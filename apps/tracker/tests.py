@@ -3,6 +3,7 @@ from datetime import date
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from apps.projects.models import Project
 from apps.tracker.models import DailyLog
@@ -36,4 +37,4 @@ class DailyCheckInTests(TestCase):
             },
         )
         self.assertRedirects(response, reverse("tracker:checkin_success"))
-        self.assertTrue(DailyLog.objects.filter(owner=self.user, log_date=date.today()).exists())
+        self.assertTrue(DailyLog.objects.filter(owner=self.user, log_date=timezone.localdate()).exists())
