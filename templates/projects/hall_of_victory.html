@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto py-12">
+  <h2 class="text-3xl font-bold text-emerald-400">Hall of Victory</h2>
+  <p class="text-sm text-slate-400">Celebrating completed projects, their efficiency, and notable achievements.</p>
+
+  <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+    {% for card in cards %}
+      {% with p=card.project %}
+      <section class="rounded-2xl p-6 bg-gradient-to-br from-emerald-900/30 to-black/60 border border-emerald-800 shadow-lg">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-xl font-semibold text-white">{{ p.title }}</h3>
+            <p class="text-xs text-slate-300 mt-1">{{ p.description|truncatechars:140 }}</p>
+          </div>
+          <div class="text-right">
+            <div class="text-sm text-slate-300">Completion Score</div>
+            <div class="text-3xl font-mono text-emerald-200">{{ card.completion_score }}%</div>
+          </div>
+        </div>
+
+        <div class="mt-4 grid grid-cols-3 gap-3 text-sm text-slate-300">
+          <div class="col-span-1">
+            <div class="text-xs uppercase text-slate-400">Days Used</div>
+            <div class="text-lg font-semibold text-white">{{ card.days_used }}</div>
+          </div>
+          <div>
+            <div class="text-xs uppercase text-slate-400">Difficulty</div>
+            <div class="text-lg font-semibold text-white">{{ card.difficulty }}</div>
+          </div>
+          <div>
+            <div class="text-xs uppercase text-slate-400">Hours</div>
+            <div class="text-lg font-semibold text-white">{{ card.hours }}</div>
+          </div>
+        </div>
+
+        <div class="mt-4 flex items-center gap-2 flex-wrap">
+          {% for a in card.achievements %}
+            <span class="px-3 py-1 rounded-full bg-emerald-700/40 text-emerald-100 text-xs">{{ a }}</span>
+          {% empty %}
+            <span class="px-3 py-1 rounded-full bg-white/5 text-slate-300 text-xs">No achievements</span>
+          {% endfor %}
+        </div>
+
+        <div class="mt-6 flex items-center justify-between">
+          <a href="{% url 'projects:edit' p.id %}" class="px-4 py-2 rounded bg-emerald-600 text-white">View</a>
+          <div class="text-xs text-slate-400">Completed on: {{ card.completed_date }}</div>
+        </div>
+      </section>
+      {% endwith %}
+    {% empty %}
+      <div class="col-span-full text-slate-400">No completed projects yet — finish something and celebrate!</div>
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock %}

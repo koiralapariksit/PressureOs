@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Check-in saved | Pressure OS{% endblock %}
+{% block content %}
+<div class="space-y-6">
+  <div class="rounded-[1.75rem] border border-emerald-500/30 bg-emerald-500/10 p-6 shadow-[0_18px_80px_rgba(0,0,0,0.28)]">
+    <p class="text-xs uppercase tracking-[0.45em] text-emerald-300">Stored</p>
+    <h1 class="mt-2 text-3xl font-semibold text-white">Daily check-in captured</h1>
+    <p class="mt-2 max-w-2xl text-sm text-slate-300">Your proof, notes, and completion state are now in the system. Progress, budget, and the AI Judge have been updated automatically.</p>
+  </div>
+
+  <div class="grid gap-4 lg:grid-cols-2">
+    <div class="rounded-[1.5rem] border border-white/10 bg-black/30 p-5">
+      <h2 class="text-xl font-semibold text-white">Latest submission</h2>
+      <dl class="mt-4 space-y-3 text-sm text-slate-300">
+        <div class="flex justify-between gap-4"><dt>Project</dt><dd class="text-right text-white">{{ latest_log.project.title }}</dd></div>
+        <div class="flex justify-between gap-4"><dt>Hours</dt><dd class="text-right text-white">{{ latest_log.hours_worked }}</dd></div>
+        <div class="flex justify-between gap-4"><dt>Tasks</dt><dd class="text-right text-white">{{ latest_log.tasks_finished }}</dd></div>
+        <div class="flex justify-between gap-4"><dt>Energy</dt><dd class="text-right text-white">{{ latest_log.get_energy_level_display }}</dd></div>
+        <div class="flex justify-between gap-4"><dt>Completed</dt><dd class="text-right text-white">{{ latest_log.completed|yesno:"Yes,No" }}</dd></div>
+      </dl>
+    </div>
+
+    <div class="rounded-[1.5rem] border border-white/10 bg-black/30 p-5">
+      <h2 class="text-xl font-semibold text-white">AI Judge update</h2>
+      <p class="mt-4 text-sm text-slate-300">{{ analysis.reality_report }}</p>
+      <div class="mt-4 rounded-2xl border border-gold-400/30 bg-gold-500/10 p-4 text-sm text-gold-100">
+        <p class="font-medium">Success probability: {{ analysis.success_probability }}%</p>
+        <p class="mt-1">Required hours tomorrow: {{ analysis.required_hours_tomorrow }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex flex-wrap gap-3">
+    <a href="{% url 'tracker:checkin' %}" class="rounded-full border border-gold-400/40 bg-gold-500/15 px-4 py-2 text-sm font-medium text-gold-200 transition hover:bg-gold-500/25">Check in again</a>
+    <a href="{% url 'dashboard:index' %}" class="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200 transition hover:bg-white/10">Open dashboard</a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-[#050505] text-slate-100">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Pressure OS{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              gold: {
+                400: '#caa24a',
+                500: '#b68b2d',
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <style>
+      :root { color-scheme: dark; }
+      body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .glass { background: rgba(7, 7, 7, 0.72); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); }
+      body.theme-green { background: radial-gradient(circle at top left, rgba(74, 222, 128, 0.16), transparent 35%), linear-gradient(135deg, #03150b 0%, #0a1f12 60%, #050505 100%); }
+      body.theme-yellow { background: radial-gradient(circle at top left, rgba(250, 204, 21, 0.16), transparent 35%), linear-gradient(135deg, #241807 0%, #271c07 60%, #050505 100%); }
+      body.theme-orange { background: radial-gradient(circle at top left, rgba(249, 115, 22, 0.16), transparent 35%), linear-gradient(135deg, #1f1207 0%, #2a1405 60%, #050505 100%); }
+      body.theme-red { background: radial-gradient(circle at top left, rgba(248, 113, 113, 0.16), transparent 35%), linear-gradient(135deg, #1c0707 0%, #290909 60%, #050505 100%); }
+      body.theme-black { background: radial-gradient(circle at top left, rgba(113, 113, 122, 0.16), transparent 35%), linear-gradient(135deg, #030303 0%, #101010 60%, #050505 100%); }
+      body.theme-default { background: radial-gradient(circle at top left, rgba(202,162,74,0.16), transparent 35%), linear-gradient(135deg,#020202_0%,#0d0d0d_60%,#050505_100%); }
+      @keyframes pulseFast { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
+      .animate-pulse-fast { animation: pulseFast 0.7s ease-in-out infinite; }
+      @keyframes pulseSlow { 0% { transform: scale(1); } 50% { transform: scale(1.01); } 100% { transform: scale(1); } }
+      .animate-pulse { animation: pulseSlow 1.8s ease-in-out infinite; }
+      @keyframes glowPulse { 0%, 100% { box-shadow: 0 0 0 rgba(202, 162, 74, 0.18); } 50% { box-shadow: 0 0 24px rgba(202, 162, 74, 0.28); } }
+      .animate-glow { animation: glowPulse 2.4s ease-in-out infinite; }
+      @keyframes floatUp { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+      .animate-float { animation: floatUp 3s ease-in-out infinite; }
+    </style>
+  </head>
+  <body class="min-h-full bg-[radial-gradient(circle_at_top_left,_rgba(202,162,74,0.16),_transparent_35%),linear-gradient(135deg,#020202_0%,#0d0d0d_60%,#050505_100%)] text-slate-100 theme-{{ pressure_theme|default:'default' }}">
+    <div class="min-h-screen px-4 py-4 sm:px-6 lg:px-8">
+      <div class="mx-auto flex max-w-7xl flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-black/30 shadow-[0_20px_120px_rgba(0,0,0,0.45)] {{ pressure_shell_class }}">
+        {% include "partials/navbar.html" %}
+        <div class="flex flex-col lg:flex-row">
+          {% include "partials/sidebar.html" %}
+          <main class="flex-1 p-4 sm:p-6 lg:p-8">
+            {% if messages %}
+              <div class="space-y-3 mb-6">
+                {% for message in messages %}
+                  <div class="rounded-2xl border border-white/10 bg-slate-950/80 px-4 py-3 text-sm text-white shadow-lg shadow-black/30 transition duration-300 hover:scale-[1.01] animate-float">
+                    {{ message }}
+                  </div>
+                {% endfor %}
+              </div>
+            {% endif %}
+            {% block content %}{% endblock %}
+          </main>
+        </div>
+        {% include "partials/footer.html" %}
+      </div>
+    </div>
+  </body>
+</html>

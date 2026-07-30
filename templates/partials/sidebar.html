@@ -1,0 +1,13 @@
+<aside class="w-full border-b border-white/10 bg-black/20 p-4 lg:w-72 lg:border-b-0 lg:border-r {{ pressure_shell_class }}">
+  <div class="space-y-2">
+    <a href="{% url 'core:home' %}" class="flex items-center rounded-2xl px-3 py-3 text-sm text-slate-300 transition hover:bg-white/10 hover:text-white">Home</a>
+    <a href="{% url 'dashboard:index' %}" class="flex items-center rounded-2xl px-3 py-3 text-sm text-slate-300 transition hover:bg-white/10 hover:text-white">Dashboard</a>
+    <a href="{% url 'projects:list' %}" class="flex items-center rounded-2xl px-3 py-3 text-sm text-slate-300 transition hover:bg-white/10 hover:text-white">Projects</a>
+    <a href="{% url 'tracker:checkin' %}" class="flex items-center rounded-2xl px-3 py-3 text-sm text-slate-300 transition hover:bg-white/10 hover:text-white">Daily Check-in</a>
+    <a href="{% url 'budget:index' %}" class="flex items-center rounded-2xl px-3 py-3 text-sm text-slate-300 transition hover:bg-white/10 hover:text-white">Budget</a>
+    <a href="{% url 'analytics:statistics' %}" class="flex items-center rounded-2xl px-3 py-3 text-sm text-slate-300 transition hover:bg-white/10 hover:text-white">Analytics</a>
+    <a href="{% url 'ai_judge:index' %}" class="flex items-center rounded-2xl px-3 py-3 text-sm text-slate-300 transition hover:bg-white/10 hover:text-white">AI Judge</a>
+    <a href="{% url 'projects:hall_of_shame' %}" class="flex items-center rounded-2xl px-3 py-3 text-sm text-rose-300 transition hover:bg-white/10 hover:text-white">Hall of Shame</a>
+    <a href="{% url 'projects:hall_of_victory' %}" class="flex items-center rounded-2xl px-3 py-3 text-sm text-emerald-300 transition hover:bg-white/10 hover:text-white">Hall of Victory</a>
+  </div>
+</aside>

@@ -1,0 +1,11 @@
+<div x-data="{score: {{ score }}, pulse: ({{ score }} >= 70)}" class="flex items-center gap-3" x-bind:class="{'animate-pulse-fast': score >= 85, 'animate-pulse': score >= 70 && score < 85}">
+  <div class="flex-1">
+    <div class="mb-1 text-xs uppercase tracking-[0.35em] text-slate-400">Pressure</div>
+    <div class="w-full rounded-full bg-white/5 h-3 overflow-hidden">
+      <div x-bind:style="`width: ${score}%`" class="h-3 rounded-full bg-gradient-to-r from-red-500 to-rose-500 transition-all duration-700 ease-out"></div>
+    </div>
+  </div>
+  <div>
+    <div x-bind:class="score >= 85 ? 'border-zinc-400/20 bg-zinc-500/20 text-zinc-200' : (score >=70 ? 'border-red-500/20 bg-red-500/10 text-red-200' : (score >=50 ? 'border-orange-400/20 bg-orange-500/10 text-orange-200' : 'border-emerald-400/20 bg-emerald-500/10 text-emerald-200'))" class="rounded-full px-3 py-1 text-sm font-medium">{{ pressure_label }}</div>
+  </div>
+</div>

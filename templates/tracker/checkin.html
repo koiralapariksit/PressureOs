@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}Daily Check-in | Pressure OS{% endblock %}
+{% block content %}
+<div class="space-y-6">
+  <div class="rounded-[1.75rem] border border-white/10 bg-white/5 p-6 shadow-[0_18px_80px_rgba(0,0,0,0.28)]">
+    <p class="text-xs uppercase tracking-[0.45em] text-gold-400">Mission pulse</p>
+    <h1 class="mt-2 text-3xl font-semibold text-white">Daily check-in</h1>
+    <p class="mt-2 max-w-2xl text-sm text-slate-400">Capture the day’s proof, preserve momentum, and let the system update budget, progress, and the AI Judge automatically.</p>
+  </div>
+
+  <form method="post" enctype="multipart/form-data" class="space-y-6 rounded-[1.75rem] border border-white/10 bg-black/30 p-6 shadow-[0_12px_50px_rgba(0,0,0,0.25)]">
+    {% csrf_token %}
+    <div class="grid gap-4 md:grid-cols-2">
+      <div class="space-y-2">
+        <label class="text-sm font-medium text-slate-200" for="id_project">Project</label>
+        {{ form.project }}
+      </div>
+      <div class="space-y-2">
+        <label class="text-sm font-medium text-slate-200" for="id_hours_worked">Hours worked</label>
+        {{ form.hours_worked }}
+      </div>
+      <div class="space-y-2">
+        <label class="text-sm font-medium text-slate-200" for="id_tasks_finished">Tasks completed</label>
+        {{ form.tasks_finished }}
+      </div>
+      <div class="space-y-2">
+        <label class="text-sm font-medium text-slate-200" for="id_github_commits">GitHub commits</label>
+        {{ form.github_commits }}
+      </div>
+      <div class="space-y-2">
+        <label class="text-sm font-medium text-slate-200" for="id_energy_level">Energy</label>
+        {{ form.energy_level }}
+      </div>
+      <div class="space-y-2">
+        <label class="text-sm font-medium text-slate-200" for="id_distractions">Distractions</label>
+        {{ form.distractions }}
+      </div>
+      <div class="space-y-2 md:col-span-2">
+        <label class="text-sm font-medium text-slate-200" for="id_notes">Notes</label>
+        {{ form.notes }}
+      </div>
+      <div class="space-y-2 md:col-span-2">
+        <label class="text-sm font-medium text-slate-200" for="id_screenshot_proof">Screenshot upload</label>
+        {{ form.screenshot_proof }}
+      </div>
+      <div class="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 md:col-span-2">
+        {{ form.completed }}
+        <label for="id_completed" class="text-sm text-slate-300">Completed?</label>
+      </div>
+    </div>
+
+    <div class="flex flex-wrap gap-3">
+      <button type="submit" class="rounded-full border border-gold-400/40 bg-gold-500/15 px-4 py-2 text-sm font-medium text-gold-200 transition hover:bg-gold-500/25">Submit check-in</button>
+      <a href="{% url 'dashboard:index' %}" class="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200 transition hover:bg-white/10">Return to dashboard</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

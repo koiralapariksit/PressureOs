@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-6">
+  <section class="rounded-[2rem] border border-white/10 bg-black/55 p-6 shadow-[0_30px_120px_rgba(0,0,0,0.45)] backdrop-blur-xl sm:p-8 {{ pressure_shell_class }}">
+    <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <div>
+        <p class="text-xs uppercase tracking-[0.45em] text-gold-400">Executive overview</p>
+        <h1 class="mt-3 text-3xl font-semibold text-white">Pressure OS command center</h1>
+        <p class="mt-3 max-w-2xl text-slate-300">A premium operating surface for the mission, the countdown, the pressure, and the numbers that matter.</p>
+      </div>
+      <div class="rounded-full border border-gold-400/20 bg-gold-400/10 px-4 py-2 text-sm text-gold-300">
+        {{ today_mission }}
+      </div>
+    </div>
+    <div class="mt-6 flex flex-wrap items-center gap-3">
+       <div id="pressure-fragment" hx-get="{% url 'analytics:pressure_fragment' %}" hx-swap="innerHTML" 
+         {% if pressure_meter >= 85 %}hx-trigger="every 5s"
+         {% elif pressure_meter >= 70 %}hx-trigger="every 8s"
+         {% else %}hx-trigger="every 15s"
+         {% endif %}>
+        {% include "analytics/pressure_fragment.html" with pressure_label=pressure_label pressure_pill_class=pressure_pill_class score=pressure_meter %}
+      </div>
+      <div class="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300">{{ pressure_description }}</div>
+    </div>
+  </section>
+
+  <section class="grid gap-4 xl:grid-cols-[1.4fr_0.8fr]">
+    <div class="rounded-[2rem] border border-white/10 bg-black/55 p-6 shadow-[0_30px_120px_rgba(0,0,0,0.45)] backdrop-blur-xl {{ pressure_panel_class }}">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <p class="text-xs uppercase tracking-[0.45em] text-gold-400">Today's Mission</p>
+          <h2 class="mt-3 text-2xl font-semibold text-white">{{ today_mission }}</h2>
+          <p class="mt-3 text-slate-400">Deadline in {{ countdown }} days. Keep the machine moving.</p>
+        </div>
+        <div class="rounded-2xl border border-gold-400/20 bg-gold-400/10 px-4 py-3 text-center {{ pressure_panel_class }}">
+          <p class="text-[0.65rem] uppercase tracking-[0.4em] text-slate-400">Countdown</p>
+          <p class="mt-2 text-2xl font-semibold text-gold-400">{{ countdown }}</p>
+        </div>
+      </div>
+      <div class="mt-6 grid gap-4 md:grid-cols-2">
+        {% include "components/metric_card.html" with title="Pressure Meter" value=pressure_meter|add:"%" subtitle="Current pressure intensity" icon="⏱" %}
+        {% include "components/metric_card.html" with title="Completion %" value=completion_percent|add:"%" subtitle="Progress to target" icon="▣" %}
+      </div>
+    </div>
+
+    <div class="rounded-[2rem] border border-white/10 bg-black/55 p-6 shadow-[0_30px_120px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+      <p class="text-xs uppercase tracking-[0.45em] text-gold-400">Current project</p>
+      <h2 class="mt-3 text-2xl font-semibold text-white">{{ project.title }}</h2>
+      <p class="mt-3 text-sm text-slate-400">{{ project.description|default:"No description yet." }}</p>
+      <div class="mt-6 space-y-4">
+        {% include "components/metric_card.html" with title="Money remaining" value="$"|add:money_remaining|stringformat:".0f" subtitle="Balance held against the mission" icon="$" %}
+        {% include "components/metric_card.html" with title="Failure streak" value=failure_streak subtitle="Unfinished days in the ledger" icon="⚠" %}
+      </div>
+    </div>
+  </section>
+
+  <section class="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+    <div class="rounded-[2rem] border border-white/10 bg-black/55 p-6 shadow-[0_30px_120px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-xs uppercase tracking-[0.45em] text-gold-400">Consistency score</p>
+          <h2 class="mt-3 text-2xl font-semibold text-white">{{ consistency_score }}%</h2>
+        </div>
+        <div class="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-300">Stable output</div>
+      </div>
+      <div class="mt-6 grid gap-4 md:grid-cols-2">
+        {% include "components/metric_card.html" with title="Focus hours" value=focus_hours subtitle="Tracked across sessions" icon="◎" %}
+        {% include "components/metric_card.html" with title="Today's hours" value=today_hours subtitle="Logged today" icon="◌" %}
+      </div>
+    </div>
+
+    <div class="rounded-[2rem] border border-white/10 bg-black/55 p-6 shadow-[0_30px_120px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-xs uppercase tracking-[0.45em] text-gold-400">Progress ring</p>
+          <h2 class="mt-3 text-2xl font-semibold text-white">Completion</h2>
+        </div>
+      </div>
+      <div class="mt-6 flex items-center justify-center">
+        {% include "components/progress_ring.html" with percent=completion_percent %}
+      </div>
+    </div>
+  </section>
+
+  <section class="rounded-[2rem] border border-white/10 bg-black/55 p-6 shadow-[0_30px_120px_rgba(0,0,0,0.45)] backdrop-blur-xl mb-6">
+    <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+      <div>
+        <p class="text-xs uppercase tracking-[0.45em] text-gold-400">Rank & reputation</p>
+        <h2 class="mt-3 text-2xl font-semibold text-white">{{ rank_title }} • Level {{ level }}</h2>
+        <p class="mt-2 text-sm text-slate-400">{{ current_xp }} XP earned • {{ rank_progress }}% to next rank</p>
+      </div>
+      <div class="w-full max-w-xl">
+        <div class="h-3 w-full overflow-hidden rounded-full bg-white/10">
+          <div class="h-full rounded-full bg-gradient-to-r from-gold-400 via-amber-400 to-emerald-400 transition-all duration-700" style="width: {{ rank_progress }}%"></div>
+        </div>
+        <div class="mt-3 flex flex-wrap gap-3">
+          <span class="rounded-full bg-white/5 px-3 py-2 text-xs text-slate-300">Next rank at {{ next_rank_threshold }} XP</span>
+          <span class="rounded-full bg-gold-500/15 px-3 py-2 text-xs text-gold-200">Current rank: {{ rank_title }}</span>
+        </div>
+      </div>
+    </div>
+    {% if recent_badges %}
+      <div class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {% for badge in recent_badges %}
+          <div class="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-200 animate-glow">
+            <div class="text-xs uppercase tracking-[0.35em] text-slate-400">Badge unlocked</div>
+            <div class="mt-2 font-semibold text-white">{{ badge.get_achievement_type_display }}</div>
+            <div class="mt-1 text-xs text-slate-500">{{ badge.earned_at|date:'M d' }}</div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </section>
+
+  <section class="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+    <div class="rounded-[2rem] border border-white/10 bg-black/55 p-6 shadow-[0_30px_120px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-xs uppercase tracking-[0.45em] text-gold-400">Recent Activity</p>
+          <h2 class="mt-3 text-2xl font-semibold text-white">Momentum trace</h2>
+        </div>
+      </div>
+      <ul class="mt-6 space-y-3">
+        {% for item in recent_activity %}
+          {% include "components/activity_item.html" with title=item.title detail=item.detail time=item.time %}
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="space-y-4">
+      <div class="rounded-[2rem] border border-white/10 bg-black/55 p-6 shadow-[0_30px_120px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-xs uppercase tracking-[0.45em] text-gold-400">Latest check-in</p>
+            <h2 class="mt-3 text-2xl font-semibold text-white">Today’s pulse</h2>
+          </div>
+          <a href="{% url 'tracker:checkin' %}" class="rounded-full border border-gold-400/30 bg-gold-500/10 px-3 py-2 text-sm text-gold-200 transition hover:bg-gold-500/20">Update</a>
+        </div>
+        {% if checkin_summary %}
+          <div class="mt-6 space-y-3 rounded-[1.5rem] border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
+            <div class="flex items-center justify-between"><span>Project</span><span class="font-medium text-white">{{ checkin_summary.project }}</span></div>
+            <div class="flex items-center justify-between"><span>Hours</span><span class="font-medium text-white">{{ checkin_summary.hours }}</span></div>
+            <div class="flex items-center justify-between"><span>Tasks</span><span class="font-medium text-white">{{ checkin_summary.tasks }}</span></div>
+            <div class="flex items-center justify-between"><span>Energy</span><span class="font-medium text-white">{{ checkin_summary.energy }}</span></div>
+            <div class="flex items-center justify-between"><span>Completed</span><span class="font-medium text-white">{{ checkin_summary.completed|yesno:"Yes,No" }}</span></div>
+            <p class="pt-2 text-slate-400">{{ checkin_summary.notes }}</p>
+          </div>
+        {% else %}
+          <div class="mt-6 rounded-[1.5rem] border border-dashed border-white/10 bg-white/5 p-4 text-sm text-slate-400">No check-in yet for today. Submit one to populate this panel.</div>
+        {% endif %}
+      </div>
+
+      <div class="rounded-[2rem] border border-white/10 bg-black/55 p-6 shadow-[0_30px_120px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+        <p class="text-xs uppercase tracking-[0.45em] text-gold-400">Recent check-ins</p>
+        <h2 class="mt-3 text-2xl font-semibold text-white">History</h2>
+        <div class="mt-4 space-y-3">
+          {% for checkin in recent_checkins %}
+            <div class="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-300">
+              <div class="flex items-center justify-between gap-3">
+                <span class="font-medium text-white">{{ checkin.date }}</span>
+                <span class="rounded-full border border-gold-400/30 bg-gold-500/10 px-2 py-1 text-[0.65rem] uppercase tracking-[0.25em] text-gold-200">{{ checkin.completed|yesno:"Done,Open" }}</span>
+              </div>
+              <div class="mt-2 flex items-center justify-between text-xs text-slate-400">
+                <span>{{ checkin.project }}</span>
+                <span>{{ checkin.hours }}h</span>
+              </div>
+            </div>
+          {% empty %}
+            <div class="rounded-2xl border border-dashed border-white/10 bg-white/5 px-4 py-4 text-sm text-slate-400">No check-ins yet. Your recent submissions will appear here.</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="rounded-[2rem] border border-white/10 bg-black/55 p-6 shadow-[0_30px_120px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+        <p class="text-xs uppercase tracking-[0.45em] text-gold-400">Charts</p>
+        <h2 class="mt-3 text-2xl font-semibold text-white">Execution trend</h2>
+        <div class="mt-8 flex h-56 items-end justify-between gap-3 rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
+          {% for point in chart_points %}
+            <div class="flex-1 rounded-t-2xl bg-gradient-to-t from-gold-500 to-gold-400" style="height: {{ point }}%"></div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

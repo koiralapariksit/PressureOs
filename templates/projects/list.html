@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}Projects | Pressure OS{% endblock %}
+{% block content %}
+<div class="space-y-6">
+  <div class="flex flex-col gap-3 rounded-[1.75rem] border border-white/10 bg-white/5 p-6 shadow-[0_18px_80px_rgba(0,0,0,0.28)] lg:flex-row lg:items-end lg:justify-between">
+    <div>
+      <p class="text-xs uppercase tracking-[0.45em] text-gold-400">Mission control</p>
+      <h1 class="mt-2 text-3xl font-semibold text-white">Project management</h1>
+      <p class="mt-2 max-w-2xl text-sm text-slate-400">Create, edit, archive, complete, and track every initiative from one place.</p>
+    </div>
+    <a href="{% url 'projects:create' %}" class="inline-flex items-center justify-center rounded-full border border-gold-400/40 bg-gold-500/15 px-4 py-2 text-sm font-medium text-gold-200 transition hover:bg-gold-500/25">New project</a>
+  </div>
+
+  <div class="grid gap-4">
+    {% for project in projects %}
+      <div class="rounded-[1.5rem] border border-white/10 bg-black/30 p-5 shadow-[0_12px_50px_rgba(0,0,0,0.25)]">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div class="space-y-3">
+            <div class="flex flex-wrap items-center gap-2">
+              <h2 class="text-xl font-semibold text-white">{{ project.title }}</h2>
+              <span class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.3em] text-slate-300">{{ project.get_status_display }}</span>
+              <span class="rounded-full border border-gold-400/30 bg-gold-500/10 px-3 py-1 text-xs uppercase tracking-[0.3em] text-gold-200">{{ project.get_priority_display }}</span>
+            </div>
+            <p class="max-w-2xl text-sm text-slate-400">{{ project.description|default:"No description added yet." }}</p>
+            <div class="flex flex-wrap gap-4 text-sm text-slate-300">
+              <span>Deadline: {{ project.deadline }}</span>
+              <span>Difficulty: {{ project.get_difficulty_display }}</span>
+              <span>Target hours: {{ project.target_hours }}</span>
+              <span>Expected daily: {{ project.expected_daily_hours }}</span>
+            </div>
+            <div class="flex flex-wrap gap-4 text-sm text-slate-300">
+              <span>Remaining days: {{ project.remaining_days }}</span>
+              <span>Required hours/day: {{ project.required_hours_per_day }}</span>
+              <span>Completion: {{ project.completion_percentage }}%</span>
+              <span>Days behind: {{ project.days_behind }}</span>
+            </div>
+            {% if project.github_repository %}
+              <a href="{{ project.github_repository }}" target="_blank" rel="noopener noreferrer" class="inline-flex text-sm text-gold-300 hover:text-gold-200">View GitHub</a>
+            {% endif %}
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <a href="{% url 'projects:edit' project.pk %}" class="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 transition hover:bg-white/10">Edit</a>
+            <a href="{% url 'projects:archive' project.pk %}" class="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 transition hover:bg-white/10">Archive</a>
+            {% if project.status != 'completed' %}
+              <a href="{% url 'projects:complete' project.pk %}" class="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200 transition hover:bg-emerald-500/20">Complete</a>
+            {% endif %}
+            <a href="{% url 'projects:delete' project.pk %}" class="rounded-full border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200 transition hover:bg-red-500/20">Delete</a>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="rounded-[1.5rem] border border-dashed border-white/10 bg-white/5 p-8 text-center text-slate-400">
+        No projects yet. Create your first mission to start tracking execution.
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
