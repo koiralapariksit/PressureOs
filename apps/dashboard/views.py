@@ -8,6 +8,7 @@ from django.views.generic import TemplateView
 from apps.analytics.models import Achievement, Statistics
 from apps.analytics.services import build_pressure_state
 from apps.budget.models import BudgetHistory
+from apps.execution.services import ExecutionService
 from apps.projects.models import FailureRecord, Project
 from apps.tracker.models import DailyLog, PomodoroSession
 
@@ -29,6 +30,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         today_hours = sum(float(entry.hours_worked) for entry in today_logs) if today_logs.exists() else 0
         focus_minutes = PomodoroSession.objects.filter(owner=user, completed=True).aggregate(total=Sum("focus_minutes"))["total"] or 0
         focus_hours = round(focus_minutes / 60, 1)
+        execution_payload = ExecutionService.build_session_payload(user)
+        execution_summary = execution_payload["summary"]
         required_hours_today = round(max(float(project.expected_daily_hours) - today_hours, 0), 1) if project.pk else 0
 
         latest_budget = BudgetHistory.objects.filter(owner=user).order_by("-created_at").first()
@@ -106,6 +109,11 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             "consistency_score": consistency_score,
             "focus_hours": focus_hours,
             "today_hours": round(today_hours, 1),
+            "execution_summary": execution_summary,
+            "execution_hours": execution_payload["total_active_hours"],
+            "execution_sessions": execution_payload["focus_sessions_count"],
+            "execution_session": execution_payload["session"],
+            "execution_status_label": execution_payload["status_label"],
             "rank_title": stats.rank_title if stats else "Builder",
             "level": stats.level if stats else 1,
             "current_xp": int(stats.xp if stats else 0),

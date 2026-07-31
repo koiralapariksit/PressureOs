@@ -1,0 +1,31 @@
+{% if session %}
+<div class="rounded-[1.25rem] border border-[#262626] bg-[#161616] p-4">
+  <div class="flex items-center justify-between">
+    <div>
+      <p class="text-[0.62rem] uppercase tracking-[0.42em] text-[#C9A961]">Mission activity</p>
+      <h3 class="mt-2 text-lg font-semibold text-[#F3F4F6]">{{ session.operation_name|default:"Focus operation" }}</h3>
+    </div>
+    <div class="rounded-full border border-[#262626] bg-[#111111] px-3 py-2 text-xs uppercase tracking-[0.35em] text-[#C9A961]">{{ status_label }}</div>
+  </div>
+  <div class="mt-4 grid gap-3 sm:grid-cols-2">
+    <div class="rounded-[1rem] border border-[#262626] bg-[#111111] p-3">
+      <p class="text-[0.62rem] uppercase tracking-[0.42em] text-[#9CA3AF]">Today's focus time</p>
+      <p class="mono-numbers mt-2 text-xl font-semibold text-[#F3F4F6]">{{ total_active_hours }}h</p>
+    </div>
+    <div class="rounded-[1rem] border border-[#262626] bg-[#111111] p-3">
+      <p class="text-[0.62rem] uppercase tracking-[0.42em] text-[#9CA3AF]">Current session</p>
+      <p class="mono-numbers mt-2 text-xl font-semibold text-[#F3F4F6]">{{ session.started_at|timesince }}</p>
+    </div>
+    <div class="rounded-[1rem] border border-[#262626] bg-[#111111] p-3">
+      <p class="text-[0.62rem] uppercase tracking-[0.42em] text-[#9CA3AF]">Longest session</p>
+      <p class="mono-numbers mt-2 text-xl font-semibold text-[#F3F4F6]">{{ summary.longest_session_seconds|default:0 }}s</p>
+    </div>
+    <div class="rounded-[1rem] border border-[#262626] bg-[#111111] p-3">
+      <p class="text-[0.62rem] uppercase tracking-[0.42em] text-[#9CA3AF]">Daily target progress</p>
+      <p class="mono-numbers mt-2 text-xl font-semibold text-[#F3F4F6]">{{ focus_sessions_count }} sessions</p>
+    </div>
+  </div>
+</div>
+{% else %}
+<div class="rounded-[1.25rem] border border-[#262626] bg-[#161616] p-4 text-sm text-[#9CA3AF]">No active mission. Start the next operation from the mission control panel.</div>
+{% endif %}

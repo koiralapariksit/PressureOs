@@ -14,7 +14,7 @@ from .models import Profile
 class LoginView(auth_views.LoginView):
     template_name = "registration/login.html"
     authentication_form = CustomAuthenticationForm
-    success_url = reverse_lazy("dashboard:index")
+    success_url = reverse_lazy("execution:control")
 
     def form_valid(self, form):
         remember_me = form.cleaned_data.get("remember_me")
@@ -49,7 +49,7 @@ class LogoutView(auth_views.LogoutView):
 class RegisterView(CreateView):
     form_class = CustomUserCreationForm
     template_name = "registration/register.html"
-    success_url = reverse_lazy("dashboard:index")
+    success_url = reverse_lazy("execution:control")
 
     def form_valid(self, form):
         user = form.save()

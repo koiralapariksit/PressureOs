@@ -25,6 +25,7 @@ urlpatterns = [
     path('projects/', include('apps.projects.urls', namespace='projects')),
     path('budget/', include('apps.budget.urls', namespace='budget')),
     path('tracker/', include('apps.tracker.urls', namespace='tracker')),
+    path('execution/', include('apps.execution.urls', namespace='execution')),
     path('analytics/', include('apps.analytics.urls', namespace='analytics')),
     path('pomodoro/', include('apps.pomodoro.urls', namespace='pomodoro')),
     path('ai-judge/', include('apps.ai_judge.urls', namespace='ai_judge')),

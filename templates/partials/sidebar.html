@@ -2,6 +2,7 @@
   <div class="space-y-2">
     <p class="px-3 pb-2 text-[0.68rem] uppercase tracking-[0.45em] text-[#9CA3AF]">Mission routes</p>
     <a href="{% url 'core:home' %}" class="flex items-center rounded-2xl border border-transparent px-3 py-3 text-sm text-[#9CA3AF] transition hover:border-[#262626] hover:bg-[#111111] hover:text-[#F3F4F6]">Home</a>
+    <a href="{% url 'execution:control' %}" data-mission-control-link="true" class="flex items-center rounded-2xl border border-[#C9A961]/40 bg-[#161616] px-3 py-3 text-sm font-medium text-[#F3F4F6] transition hover:border-[#C9A961] hover:bg-[#111111]">🚀 Mission Control</a>
     <a href="{% url 'dashboard:index' %}" class="flex items-center rounded-2xl border border-transparent px-3 py-3 text-sm text-[#9CA3AF] transition hover:border-[#262626] hover:bg-[#111111] hover:text-[#F3F4F6]">Dashboard</a>
     <a href="{% url 'projects:list' %}" class="flex items-center rounded-2xl border border-transparent px-3 py-3 text-sm text-[#9CA3AF] transition hover:border-[#262626] hover:bg-[#111111] hover:text-[#F3F4F6]">Projects</a>
     <a href="{% url 'tracker:checkin' %}" class="flex items-center rounded-2xl border border-transparent px-3 py-3 text-sm text-[#9CA3AF] transition hover:border-[#262626] hover:bg-[#111111] hover:text-[#F3F4F6]">Daily Check-in</a>

@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block title %}Execution Control | Pressure OS{% endblock %}
+{% block content %}
+<div class="space-y-6">
+  <section class="rounded-[1.75rem] border border-[#262626] bg-[#111111] p-6">
+    <p class="text-[0.62rem] uppercase tracking-[0.38em] text-[#C9A961]">Mission control</p>
+    <h1 class="mt-2 text-3xl font-semibold text-[#F3F4F6]">Execution tracking</h1>
+    <p class="mt-2 max-w-2xl text-sm text-[#9CA3AF]">Start a focus operation, suspend it during interruptions, and let the system produce the official work-hour data for this day.</p>
+  </section>
+
+  <section class="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+    <div class="rounded-[1.75rem] border border-[#262626] bg-[#111111] p-6">
+      <div id="mission-panel" class="rounded-[1.5rem] border border-[#262626] bg-[#161616] p-5">
+        <p class="text-[0.62rem] uppercase tracking-[0.42em] text-[#C9A961]">Mission active</p>
+        {% if session %}
+          <h2 class="mt-3 text-2xl font-semibold text-[#F3F4F6]">{{ session.operation_name|default:"Focus operation" }}</h2>
+          <p class="mt-2 text-sm text-[#9CA3AF]">Current project: {{ session.project.title|default:"Unassigned" }}</p>
+          <div class="mt-5 rounded-[1.25rem] border border-[#262626] bg-[#111111] p-4">
+            <div class="flex items-center justify-between text-sm text-[#9CA3AF]">
+              <span>Elapsed time</span>
+              <span class="mono-numbers text-[#F3F4F6]" id="elapsed-time">00:00:00</span>
+            </div>
+            <div class="mt-4 h-2 overflow-hidden rounded-full bg-[#262626]">
+              <div class="h-full rounded-full bg-[#C9A961]" style="width: 70%"></div>
+            </div>
+          </div>
+          <div class="mt-5 flex flex-wrap gap-3">
+            {% if session.status == 'paused' %}
+              <form method="post" hx-post="{% url 'execution:action' %}" hx-target="#mission-panel" hx-swap="innerHTML">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="resume">
+                <button type="submit" class="rounded-full border border-[#C9A961]/60 bg-[#161616] px-4 py-2 text-sm font-medium text-[#C9A961]">Resume</button>
+              </form>
+            {% else %}
+              <form method="post" hx-post="{% url 'execution:action' %}" hx-target="#mission-panel" hx-swap="innerHTML">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="pause">
+                <button type="submit" class="rounded-full border border-[#262626] bg-[#161616] px-4 py-2 text-sm text-[#F3F4F6]">Pause</button>
+              </form>
+            {% endif %}
+            <form method="post" hx-post="{% url 'execution:action' %}" hx-target="#mission-panel" hx-swap="innerHTML">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="finish">
+              <button type="submit" class="rounded-full border border-[#C9A961]/60 bg-[#161616] px-4 py-2 text-sm font-medium text-[#C9A961]">Execute</button>
+            </form>
+            <form method="post" hx-post="{% url 'execution:action' %}" hx-target="#mission-panel" hx-swap="innerHTML">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="end_day">
+              <button type="submit" class="rounded-full border border-[#262626] bg-[#161616] px-4 py-2 text-sm text-[#F3F4F6]">End Day</button>
+            </form>
+          </div>
+        {% else %}
+          <h2 class="mt-3 text-2xl font-semibold text-[#F3F4F6]">No active mission</h2>
+          <p class="mt-2 text-sm text-[#9CA3AF]">Start one to build the daily work record automatically.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="rounded-[1.75rem] border border-[#262626] bg-[#111111] p-6">
+      <p class="text-[0.62rem] uppercase tracking-[0.42em] text-[#C9A961]">Launch mission</p>
+      <form method="post" hx-post="{% url 'execution:start' %}" hx-target="#mission-panel" hx-swap="innerHTML" class="mt-4 space-y-4">
+        {% csrf_token %}
+        <div class="space-y-2">
+          <label class="text-sm font-medium text-[#D1D5DB]" for="id_project">Project</label>
+          {{ form.project }}
+        </div>
+        <div class="space-y-2">
+          <label class="text-sm font-medium text-[#D1D5DB]" for="id_operation_name">Operation name</label>
+          {{ form.operation_name }}
+        </div>
+        <button type="submit" class="rounded-full border border-[#C9A961]/60 bg-[#161616] px-4 py-2 text-sm font-medium text-[#C9A961]">Start Mission</button>
+      </form>
+
+      <div class="mt-6 rounded-[1.25rem] border border-[#262626] bg-[#161616] p-4">
+        <p class="text-[0.62rem] uppercase tracking-[0.42em] text-[#C9A961]">Today's execution</p>
+        {% if summary %}
+          <div class="mt-4 space-y-3 text-sm text-[#9CA3AF]">
+            <div class="flex items-center justify-between"><span>Total active time</span><span class="mono-numbers text-[#F3F4F6]">{{ total_active_hours }}h</span></div>
+            <div class="flex items-center justify-between"><span>Focus sessions</span><span class="mono-numbers text-[#F3F4F6]">{{ summary.focus_sessions_count }}</span></div>
+            <div class="flex items-center justify-between"><span>Average session</span><span class="mono-numbers text-[#F3F4F6]">{{ summary.average_session_seconds }}s</span></div>
+            <div class="flex items-center justify-between"><span>Longest session</span><span class="mono-numbers text-[#F3F4F6]">{{ summary.longest_session_seconds }}s</span></div>
+          </div>
+        {% else %}
+          <p class="mt-4 text-sm text-[#9CA3AF]">No focus sessions recorded today.</p>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

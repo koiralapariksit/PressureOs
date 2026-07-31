@@ -142,6 +142,16 @@
           prevArrow: '←',
           nextArrow: '→'
         });
+
+        document.addEventListener('keydown', function (event) {
+          if (event.ctrlKey && event.shiftKey && (event.key === 'M' || event.key === 'm')) {
+            event.preventDefault();
+            const target = document.querySelector('[data-mission-control-link]');
+            if (target) {
+              window.location.href = target.getAttribute('href');
+            }
+          }
+        });
       });
     </script>
   </head>

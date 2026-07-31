@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'apps.dashboard',
     'apps.projects',
     'apps.tracker',
+    'apps.execution',
     'apps.budget',
     'apps.analytics',
     'apps.pomodoro',

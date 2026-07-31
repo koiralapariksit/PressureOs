@@ -18,6 +18,7 @@
       <div class="space-y-2">
         <label class="text-sm font-medium text-[#D1D5DB]" for="id_hours_worked">Hours worked</label>
         {{ form.hours_worked }}
+        <p class="text-xs text-[#9CA3AF]">Auto-populated from the execution tracker for today.</p>
       </div>
       <div class="space-y-2">
         <label class="text-sm font-medium text-[#D1D5DB]" for="id_tasks_finished">Tasks completed</label>
@@ -53,6 +54,10 @@
       <button type="submit" class="rounded-full border border-[#C9A961]/60 bg-[#161616] px-4 py-2 text-sm font-medium text-[#C9A961] transition hover:border-[#F3F4F6] hover:text-[#F3F4F6]">Submit check-in</button>
       <a href="{% url 'dashboard:index' %}" class="rounded-full border border-[#262626] bg-[#161616] px-4 py-2 text-sm text-[#F3F4F6] transition hover:border-[#C9A961] hover:text-[#C9A961]">Return to dashboard</a>
     </div>
+
+    {% if not form.hours_worked.value %}
+      <div class="rounded-[1rem] border border-[#262626] bg-[#161616] px-4 py-3 text-sm text-[#9CA3AF]">No focus sessions recorded today.</div>
+    {% endif %}
   </form>
 </div>
 {% endblock %}

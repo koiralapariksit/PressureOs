@@ -4,10 +4,14 @@
     <h2 class="mt-2 text-lg font-semibold text-[#F3F4F6]">Execution Command Center</h2>
   </div>
   <div class="flex items-center gap-3">
-    <div class="hidden rounded-full border border-[#262626] bg-[#111111] px-4 py-2 text-sm text-[#9CA3AF] sm:block">
-      Pressure rises daily.
-    </div>
     {% if user.is_authenticated %}
+      <div class="hidden rounded-full border border-[#262626] bg-[#111111] px-4 py-2 text-sm text-[#9CA3AF] sm:flex sm:items-center sm:gap-2">
+        <a href="{% url 'execution:control' %}" class="font-medium text-[#F3F4F6] transition hover:text-[#C9A961]">Start Mission</a>
+        <span class="text-[#262626]">•</span>
+        <a href="{% url 'tracker:checkin' %}" class="transition hover:text-[#C9A961]">Daily Check-in</a>
+        <span class="text-[#262626]">•</span>
+        <a href="{% url 'ai_judge:index' %}" class="transition hover:text-[#C9A961]">AI Judge</a>
+      </div>
       <a href="{% url 'accounts:profile' %}" class="rounded-full border border-[#262626] bg-[#111111] px-4 py-2 text-sm font-medium text-[#F3F4F6] transition hover:border-[#C9A961] hover:text-[#C9A961]">Profile</a>
       <a href="{% url 'accounts:logout' %}" class="rounded-full border border-[#262626] bg-[#111111] px-4 py-2 text-sm font-medium text-[#F3F4F6] transition hover:border-[#EF4444] hover:text-[#EF4444]">Logout</a>
     {% else %}

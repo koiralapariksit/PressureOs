@@ -11,6 +11,7 @@ from apps.ai_judge.services import AIJudgeService
 from apps.analytics.models import Achievement, Statistics
 from apps.analytics.services import award_achievement, award_xp, build_pressure_state
 from apps.budget.models import BudgetHistory
+from apps.execution.services import ExecutionService
 from apps.projects.models import FailureRecord, Project
 from apps.tracker.models import DailyLog
 
@@ -36,6 +37,14 @@ class DailyCheckInForm(ModelForm):
         if self.user:
             self.fields["project"].queryset = Project.objects.filter(owner=self.user).order_by("deadline")
         self.fields["completed"].required = False
+        self.fields["hours_worked"].required = False
+        self.fields["hours_worked"].widget.attrs["readonly"] = True
+        summary = ExecutionService.get_today_summary(self.user) if self.user else None
+        if summary:
+            hours_value = round(summary.total_seconds / 3600, 2)
+            self.fields["hours_worked"].initial = hours_value
+            self.fields["tasks_finished"].initial = summary.focus_sessions_count
+            self.fields["notes"].initial = f"Auto-generated from {summary.focus_sessions_count} focus sessions."
 
 
 class DailyCheckInView(LoginRequiredMixin, FormView):
@@ -55,8 +64,12 @@ class DailyCheckInView(LoginRequiredMixin, FormView):
             "project": project,
             "log_date": timezone.localdate(),
         }
+        summary = ExecutionService.get_today_summary(self.request.user)
+        hours_worked = form.cleaned_data.get("hours_worked")
+        if hours_worked in {None, ""} and summary:
+            hours_worked = round(summary.total_seconds / 3600, 2)
         defaults = {
-            "hours_worked": form.cleaned_data["hours_worked"],
+            "hours_worked": hours_worked or Decimal("0.00"),
             "tasks_finished": form.cleaned_data["tasks_finished"],
             "notes": form.cleaned_data["notes"],
             "energy_level": form.cleaned_data["energy_level"],
