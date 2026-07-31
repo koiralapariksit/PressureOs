@@ -2,79 +2,79 @@
 {% block title %}Punishment Ledger | Pressure OS{% endblock %}
 {% block content %}
 <div class="space-y-6">
-  <div class="rounded-[2rem] border border-white/10 bg-gradient-to-br from-black/70 via-zinc-900/70 to-red-950/40 p-7 shadow-[0_22px_90px_rgba(0,0,0,0.35)]">
+  <section class="rounded-[1.75rem] border border-[#262626] bg-[#111111] p-5 sm:p-6">
     <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
       <div>
-        <p class="text-xs uppercase tracking-[0.45em] text-gold-400">Punishment system</p>
-        <h1 class="mt-2 text-3xl font-semibold text-white">Financial consequences for missed days</h1>
-        <p class="mt-3 max-w-2xl text-sm text-slate-400">Every failed day costs more, and a successful day resets the multiplier. Everything is stored in the database.</p>
+        <p class="text-[0.62rem] uppercase tracking-[0.38em] text-[#C9A961]">Punishment system</p>
+        <h1 class="mt-2 text-3xl font-semibold text-[#F3F4F6]">Financial consequences for missed days</h1>
+        <p class="mt-3 max-w-2xl text-sm text-[#9CA3AF]">Every failed day costs more, and a successful day resets the multiplier. Everything is stored in the database.</p>
       </div>
       <div class="flex gap-3">
         <form method="post" action="{% url 'budget:reset' %}">
           {% csrf_token %}
-          <button class="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm font-medium text-emerald-200 transition hover:bg-emerald-500/20">Reset to initial budget</button>
+          <button class="rounded-full border border-[#262626] bg-[#161616] px-4 py-2 text-sm font-medium text-[#F3F4F6] transition hover:border-[#C9A961] hover:text-[#C9A961]">Reset to initial budget</button>
         </form>
       </div>
     </div>
-  </div>
+  </section>
 
-  <div class="grid gap-4 lg:grid-cols-3">
-    <div class="animate-pulse rounded-[1.6rem] border border-white/10 bg-white/5 p-5">
-      <p class="text-sm text-slate-400">Original budget</p>
-      <p class="mt-3 text-3xl font-semibold text-white">Rs.{{ initial_budget }}</p>
+  <section class="grid gap-4 lg:grid-cols-3">
+    <div class="rounded-[1.25rem] border border-[#262626] bg-[#161616] p-5">
+      <p class="text-sm text-[#9CA3AF]">Original budget</p>
+      <p class="mt-3 text-3xl font-semibold text-[#F3F4F6]">Rs.{{ initial_budget }}</p>
     </div>
-    <div class="animate-pulse rounded-[1.6rem] border border-white/10 bg-white/5 p-5">
-      <p class="text-sm text-slate-400">Current budget</p>
-      <p class="mt-3 text-3xl font-semibold text-gold-200">Rs.{{ current_budget }}</p>
+    <div class="rounded-[1.25rem] border border-[#262626] bg-[#161616] p-5">
+      <p class="text-sm text-[#9CA3AF]">Current budget</p>
+      <p class="mt-3 text-3xl font-semibold text-[#C9A961]">Rs.{{ current_budget }}</p>
     </div>
-    <div class="animate-pulse rounded-[1.6rem] border border-white/10 bg-white/5 p-5">
-      <p class="text-sm text-slate-400">Money lost</p>
-      <p class="mt-3 text-3xl font-semibold text-red-300">Rs.{{ money_lost }}</p>
+    <div class="rounded-[1.25rem] border border-[#262626] bg-[#161616] p-5">
+      <p class="text-sm text-[#9CA3AF]">Money lost</p>
+      <p class="mt-3 text-3xl font-semibold text-[#FCA5A5]">Rs.{{ money_lost }}</p>
     </div>
-  </div>
+  </section>
 
-  <div class="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-    <div class="rounded-[1.6rem] border border-white/10 bg-black/30 p-6 shadow-[0_18px_80px_rgba(0,0,0,0.25)]">
+  <section class="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+    <div class="rounded-[1.5rem] border border-[#262626] bg-[#111111] p-6">
       <div class="flex items-center justify-between">
         <div>
-          <p class="text-xs uppercase tracking-[0.45em] text-gold-400">Penalty trigger</p>
-          <h2 class="mt-2 text-xl font-semibold text-white">Today's penalty</h2>
+          <p class="text-[0.62rem] uppercase tracking-[0.38em] text-[#C9A961]">Penalty trigger</p>
+          <h2 class="mt-2 text-xl font-semibold text-[#F3F4F6]">Today's penalty</h2>
         </div>
-        <div class="rounded-full border border-red-500/20 bg-red-500/10 px-3 py-1 text-sm text-red-200">Doubling ladder</div>
+        <div class="rounded-full border border-[#EF4444]/40 bg-[#1B0A0A] px-3 py-1 text-sm text-[#FCA5A5]">Doubling ladder</div>
       </div>
       <form method="post" action="{% url 'budget:apply' %}" class="mt-6 space-y-4">
         {% csrf_token %}
         <div>
-          <label class="block text-sm text-slate-300" for="id_reason">Reason</label>
+          <label class="block text-sm text-[#D1D5DB]" for="id_reason">Reason</label>
           {{ form.reason }}
         </div>
-        <button class="rounded-full border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-200 transition hover:bg-red-500/20">Apply today's penalty</button>
+        <button class="rounded-full border border-[#EF4444]/40 bg-[#1B0A0A] px-4 py-2 text-sm font-medium text-[#FCA5A5] transition hover:bg-[#2A0D0D]">Apply today's penalty</button>
       </form>
-      <div class="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-400">
+      <div class="mt-6 rounded-[1rem] border border-[#262626] bg-[#161616] p-4 text-sm text-[#9CA3AF]">
         <p>Penalty ladder: 1st = 100, 2nd = 200, 3rd = 400, 4th = 800, then double each time until reset.</p>
       </div>
     </div>
 
-    <div class="rounded-[1.6rem] border border-white/10 bg-black/30 p-6 shadow-[0_18px_80px_rgba(0,0,0,0.25)]">
-      <p class="text-xs uppercase tracking-[0.45em] text-gold-400">Ledger</p>
-      <h2 class="mt-2 text-xl font-semibold text-white">Penalty history</h2>
+    <div class="rounded-[1.5rem] border border-[#262626] bg-[#111111] p-6">
+      <p class="text-[0.62rem] uppercase tracking-[0.38em] text-[#C9A961]">Ledger</p>
+      <h2 class="mt-2 text-xl font-semibold text-[#F3F4F6]">Penalty history</h2>
       <div class="mt-5 space-y-3">
         {% for entry in history %}
-          <div class="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+          <div class="flex items-center justify-between rounded-[1rem] border border-[#262626] bg-[#161616] px-4 py-3">
             <div>
-              <p class="text-sm font-medium text-white">{{ entry.get_change_type_display }}</p>
-              <p class="text-xs text-slate-400">{{ entry.reason|default:"No reason provided" }}</p>
+              <p class="text-sm font-medium text-[#F3F4F6]">{{ entry.get_change_type_display }}</p>
+              <p class="text-xs text-[#9CA3AF]">{{ entry.reason|default:"No reason provided" }}</p>
             </div>
             <div class="text-right">
-              <p class="text-sm font-semibold text-slate-100">Rs.{{ entry.amount }}</p>
-              <p class="text-xs text-slate-400">{{ entry.created_at|date:"M d, Y" }}</p>
+              <p class="text-sm font-semibold text-[#D1D5DB]">Rs.{{ entry.amount }}</p>
+              <p class="text-xs text-[#9CA3AF]">{{ entry.created_at|date:"M d, Y" }}</p>
             </div>
           </div>
         {% empty %}
-          <div class="rounded-2xl border border-dashed border-white/10 bg-white/5 p-5 text-sm text-slate-400">No punishment history yet.</div>
+          <div class="rounded-[1rem] border border-dashed border-[#262626] bg-[#161616] p-5 text-sm text-[#9CA3AF]">No punishment history yet.</div>
         {% endfor %}
       </div>
     </div>
-  </div>
+  </section>
 </div>
 {% endblock %}

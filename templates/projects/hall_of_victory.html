@@ -1,58 +1,61 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto py-12">
-  <h2 class="text-3xl font-bold text-emerald-400">Hall of Victory</h2>
-  <p class="text-sm text-slate-400">Celebrating completed projects, their efficiency, and notable achievements.</p>
+<div class="space-y-6">
+  <section class="rounded-[1.75rem] border border-[#262626] bg-[#111111] p-5 sm:p-6">
+    <p class="text-[0.62rem] uppercase tracking-[0.38em] text-[#A7F3D0]">Hall of Victory</p>
+    <h2 class="mt-2 text-3xl font-semibold text-[#F3F4F6]">Celebrating completed projects and their execution quality.</h2>
+    <p class="mt-2 text-sm text-[#9CA3AF]">Completed work is logged as a stable record of precision, efficiency, and proof.</p>
+  </section>
 
-  <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+  <section class="grid grid-cols-1 gap-6 md:grid-cols-2">
     {% for card in cards %}
       {% with p=card.project %}
-      <section class="rounded-2xl p-6 bg-gradient-to-br from-emerald-900/30 to-black/60 border border-emerald-800 shadow-lg">
-        <div class="flex items-center justify-between">
+      <section class="rounded-[1.5rem] border border-[#262626] bg-[#111111] p-6">
+        <div class="flex items-center justify-between gap-4">
           <div>
-            <h3 class="text-xl font-semibold text-white">{{ p.title }}</h3>
-            <p class="text-xs text-slate-300 mt-1">{{ p.description|truncatechars:140 }}</p>
+            <h3 class="text-xl font-semibold text-[#F3F4F6]">{{ p.title }}</h3>
+            <p class="mt-1 text-xs text-[#9CA3AF]">{{ p.description|truncatechars:140 }}</p>
           </div>
           <div class="text-right">
-            <div class="text-sm text-slate-300">Completion Score</div>
-            <div class="text-3xl font-mono text-emerald-200">{{ card.completion_score }}%</div>
+            <div class="text-sm text-[#D1D5DB]">Completion Score</div>
+            <div class="text-3xl font-mono text-[#A7F3D0]">{{ card.completion_score }}%</div>
           </div>
         </div>
 
-        <div class="mt-4 grid grid-cols-3 gap-3 text-sm text-slate-300">
+        <div class="mt-4 grid grid-cols-3 gap-3 text-sm text-[#D1D5DB]">
           <div class="col-span-1">
-            <div class="text-xs uppercase text-slate-400">Days Used</div>
-            <div class="text-lg font-semibold text-white">{{ card.days_used }}</div>
+            <div class="text-xs uppercase text-[#9CA3AF]">Days Used</div>
+            <div class="text-lg font-semibold text-[#F3F4F6]">{{ card.days_used }}</div>
           </div>
           <div>
-            <div class="text-xs uppercase text-slate-400">Difficulty</div>
-            <div class="text-lg font-semibold text-white">{{ card.difficulty }}</div>
+            <div class="text-xs uppercase text-[#9CA3AF]">Difficulty</div>
+            <div class="text-lg font-semibold text-[#F3F4F6]">{{ card.difficulty }}</div>
           </div>
           <div>
-            <div class="text-xs uppercase text-slate-400">Hours</div>
-            <div class="text-lg font-semibold text-white">{{ card.hours }}</div>
+            <div class="text-xs uppercase text-[#9CA3AF]">Hours</div>
+            <div class="text-lg font-semibold text-[#F3F4F6]">{{ card.hours }}</div>
           </div>
         </div>
 
-        <div class="mt-4 flex items-center gap-2 flex-wrap">
+        <div class="mt-4 flex flex-wrap items-center gap-2">
           {% for a in card.achievements %}
-            <span class="px-3 py-1 rounded-full bg-emerald-700/40 text-emerald-100 text-xs">{{ a }}</span>
+            <span class="rounded-full border border-[#10B981]/40 bg-[#081410] px-3 py-1 text-xs text-[#A7F3D0]">{{ a }}</span>
           {% empty %}
-            <span class="px-3 py-1 rounded-full bg-white/5 text-slate-300 text-xs">No achievements</span>
+            <span class="rounded-full border border-[#262626] bg-[#161616] px-3 py-1 text-xs text-[#9CA3AF]">No achievements</span>
           {% endfor %}
         </div>
 
         <div class="mt-6 flex items-center justify-between">
-          <a href="{% url 'projects:edit' p.id %}" class="px-4 py-2 rounded bg-emerald-600 text-white">View</a>
-          <div class="text-xs text-slate-400">Completed on: {{ card.completed_date }}</div>
+          <a href="{% url 'projects:edit' p.id %}" class="rounded-full border border-[#10B981]/40 bg-[#081410] px-4 py-2 text-sm text-[#A7F3D0]">View</a>
+          <div class="text-xs text-[#9CA3AF]">Completed on: {{ card.completed_date }}</div>
         </div>
       </section>
       {% endwith %}
     {% empty %}
-      <div class="col-span-full text-slate-400">No completed projects yet — finish something and celebrate!</div>
+      <div class="col-span-full rounded-[1.5rem] border border-dashed border-[#262626] bg-[#111111] p-6 text-[#9CA3AF]">No completed projects yet — finish something and celebrate!</div>
     {% endfor %}
-  </div>
+  </section>
 </div>
 
 {% endblock %}

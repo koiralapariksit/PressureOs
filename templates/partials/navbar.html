@@ -1,17 +1,17 @@
-<nav class="glass flex items-center justify-between border-b border-white/10 px-4 py-4 sm:px-6 lg:px-8 {{ pressure_shell_class }}">
+<nav class="glass flex items-center justify-between border-b border-[#262626] px-4 py-4 sm:px-6 lg:px-8 {{ pressure_shell_class }}">
   <div>
-    <p class="text-xs uppercase tracking-[0.45em] text-gold-400">Pressure OS</p>
-    <h2 class="text-lg font-semibold text-white">Execution Command Center</h2>
+    <p class="text-[0.68rem] uppercase tracking-[0.5em] text-[#C9A961]">Pressure OS</p>
+    <h2 class="mt-2 text-lg font-semibold text-[#F3F4F6]">Execution Command Center</h2>
   </div>
   <div class="flex items-center gap-3">
-    <div class="hidden rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300 sm:block">
+    <div class="hidden rounded-full border border-[#262626] bg-[#111111] px-4 py-2 text-sm text-[#9CA3AF] sm:block">
       Pressure rises daily.
     </div>
     {% if user.is_authenticated %}
-      <a href="{% url 'accounts:profile' %}" class="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-4 py-2 text-sm font-medium text-emerald-200 transition hover:bg-emerald-500/20">Profile</a>
-      <a href="{% url 'accounts:logout' %}" class="rounded-full border border-slate-400/30 bg-slate-500/10 px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-slate-500/20">Logout</a>
+      <a href="{% url 'accounts:profile' %}" class="rounded-full border border-[#262626] bg-[#111111] px-4 py-2 text-sm font-medium text-[#F3F4F6] transition hover:border-[#C9A961] hover:text-[#C9A961]">Profile</a>
+      <a href="{% url 'accounts:logout' %}" class="rounded-full border border-[#262626] bg-[#111111] px-4 py-2 text-sm font-medium text-[#F3F4F6] transition hover:border-[#EF4444] hover:text-[#EF4444]">Logout</a>
     {% else %}
-      <a href="{% url 'accounts:login' %}" class="rounded-full border border-red-500/40 bg-red-600/20 px-4 py-2 text-sm font-medium text-red-200 transition hover:bg-red-600/30">Login</a>
+      <a href="{% url 'accounts:login' %}" class="rounded-full border border-[#EF4444] bg-[#1B0A0A] px-4 py-2 text-sm font-medium text-[#FCA5A5] transition hover:bg-[#2A0D0D]">Login</a>
     {% endif %}
   </div>
 </nav>

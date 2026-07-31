@@ -1,28 +1,28 @@
 {% extends 'base.html' %}
 {% block title %}{% if form.instance.pk %}Edit{% else %}Create{% endif %} Project | Pressure OS{% endblock %}
 {% block content %}
-<div class="mx-auto max-w-3xl rounded-[1.75rem] border border-white/10 bg-black/30 p-6 shadow-[0_18px_80px_rgba(0,0,0,0.28)]">
+<div class="mx-auto max-w-3xl rounded-[1.75rem] border border-[#262626] bg-[#111111] p-6">
   <div class="mb-6">
-    <p class="text-xs uppercase tracking-[0.45em] text-gold-400">Project builder</p>
-    <h1 class="mt-2 text-3xl font-semibold text-white">{% if form.instance.pk %}Edit project{% else %}Create project{% endif %}</h1>
+    <p class="text-[0.68rem] uppercase tracking-[0.5em] text-[#C9A961]">Project builder</p>
+    <h1 class="mt-2 text-3xl font-semibold text-[#F3F4F6]">{% if form.instance.pk %}Edit project{% else %}Create project{% endif %}</h1>
   </div>
 
   <form method="post" class="space-y-5">
     {% csrf_token %}
     {% for field in form %}
       <div class="space-y-2">
-        <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-slate-200">{{ field.label }}</label>
-        <div class="rounded-2xl border border-white/10 bg-white/5 p-3 text-slate-100">
+        <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-[#F3F4F6]">{{ field.label }}</label>
+        <div class="rounded-[1rem] border border-[#262626] bg-[#161616] p-3 text-[#F3F4F6]">
           {{ field }}
         </div>
         {% if field.errors %}
-          <p class="text-sm text-red-300">{{ field.errors|striptags }}</p>
+          <p class="text-sm text-[#FCA5A5]">{{ field.errors|striptags }}</p>
         {% endif %}
       </div>
     {% endfor %}
     <div class="flex items-center justify-end gap-3 pt-4">
-      <a href="{% url 'projects:list' %}" class="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200">Cancel</a>
-      <button type="submit" class="rounded-full border border-gold-400/40 bg-gold-500/15 px-4 py-2 text-sm font-medium text-gold-200">Save project</button>
+      <a href="{% url 'projects:list' %}" class="rounded-full border border-[#262626] bg-[#161616] px-4 py-2 text-sm text-[#F3F4F6]">Cancel</a>
+      <button type="submit" class="rounded-full border border-[#C9A961]/60 bg-[#161616] px-4 py-2 text-sm font-medium text-[#C9A961]">Save project</button>
     </div>
   </form>
 </div>

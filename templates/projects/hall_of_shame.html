@@ -1,64 +1,66 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto py-12">
-  <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-    <div>
-      <h2 class="text-3xl font-bold text-rose-400">Hall of Shame</h2>
-      <p class="text-sm text-slate-400">Failed projects that burned budget, time, and momentum.</p>
+<div class="space-y-6">
+  <section class="rounded-[1.75rem] border border-[#262626] bg-[#111111] p-5 sm:p-6">
+    <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <div>
+        <p class="text-[0.62rem] uppercase tracking-[0.38em] text-[#FCA5A5]">Hall of Shame</p>
+        <h2 class="mt-2 text-3xl font-semibold text-[#F3F4F6]">Failed projects that burned budget, time, and momentum.</h2>
+      </div>
+      <div class="rounded-[1.25rem] border border-[#EF4444]/40 bg-[#1B0A0A] p-5">
+        <div class="text-[0.62rem] uppercase tracking-[0.38em] text-[#FCA5A5]">Shame ledger</div>
+        <div class="mt-3 text-sm text-[#D1D5DB]">Projects failed: <strong class="text-[#F3F4F6]">{{ summary.count }}</strong></div>
+        <div class="mt-1 text-sm text-[#D1D5DB]">Total days lost: <strong class="text-[#F3F4F6]">{{ summary.total_days_lost }}</strong></div>
+        <div class="mt-1 text-sm text-[#D1D5DB]">Total budget impact: <strong class="text-[#F3F4F6]">${{ summary.total_lost }}</strong></div>
+      </div>
     </div>
-    <div class="rounded-3xl border border-rose-700/60 bg-rose-950/20 p-5 shadow-xl">
-      <div class="text-xs uppercase tracking-[0.2em] text-rose-300">Shame ledger</div>
-      <div class="mt-3 text-sm text-slate-300">Projects failed: <strong>{{ summary.count }}</strong></div>
-      <div class="mt-1 text-sm text-slate-300">Total days lost: <strong>{{ summary.total_days_lost }}</strong></div>
-      <div class="mt-1 text-sm text-slate-300">Total budget impact: <strong>${{ summary.total_lost }}</strong></div>
-    </div>
-  </div>
+  </section>
 
-  <div class="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  <section class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
     {% for card in cards %}
       {% with p=card.project f=card.latest_failure %}
-      <article class="rounded-xl p-5 bg-gradient-to-br from-black/30 to-black/60 border border-white/5 shadow-lg">
-        <div class="flex items-start justify-between">
+      <article class="rounded-[1.5rem] border border-[#262626] bg-[#111111] p-5">
+        <div class="flex items-start justify-between gap-4">
           <div>
-            <h3 class="text-lg font-semibold text-white">{{ p.title }}</h3>
-            <p class="text-xs text-slate-400 mt-1">Category: {{ p.get_category_display }} • Priority: {{ p.get_priority_display }}</p>
+            <h3 class="text-lg font-semibold text-[#F3F4F6]">{{ p.title }}</h3>
+            <p class="mt-1 text-xs text-[#9CA3AF]">Category: {{ p.get_category_display }} • Priority: {{ p.get_priority_display }}</p>
           </div>
           <div class="text-right">
-            <div class="text-sm text-slate-300">Completion</div>
-            <div class="text-2xl font-mono text-white">{{ card.stats.completion_pct }}%</div>
+            <div class="text-sm text-[#D1D5DB]">Completion</div>
+            <div class="text-2xl font-mono text-[#F3F4F6]">{{ card.stats.completion_pct }}%</div>
           </div>
         </div>
 
         <div class="mt-4">
-          <div class="w-full bg-white/5 rounded-full h-2 overflow-hidden">
-            <div class="h-2 bg-rose-600" style="width: {{ p.completion_percentage }}%"></div>
+          <div class="h-2 w-full overflow-hidden rounded-full bg-[#262626]">
+            <div class="h-2 bg-[#EF4444]" style="width: {{ p.completion_percentage }}%"></div>
           </div>
         </div>
 
-        <div class="mt-4 text-sm text-slate-300 space-y-2">
-          <div><strong>Failure date:</strong> {% if f %}{{ f.failure_date }}{% else %}—{% endif %}</div>
-          <div><strong>Reason:</strong> {% if f %}{{ f.reason|default:'(no reason recorded)' }}{% else %}(no reason recorded){% endif %}</div>
-          <div><strong>Budget lost (est.):</strong> ${{ card.budget_lost_estimate }}</div>
-          <div><strong>Days lost:</strong> {{ card.total_days_lost }}</div>
-          <div><strong>Burn rate:</strong> {{ card.burn_rate|floatformat:1 }}</div>
-          <div><strong>Severity:</strong> {{ card.severity }} / 100</div>
-          <div><strong>Urgent advice:</strong> {{ card.advice }}</div>
+        <div class="mt-4 space-y-2 text-sm text-[#D1D5DB]">
+          <div><strong class="text-[#F3F4F6]">Failure date:</strong> {% if f %}{{ f.failure_date }}{% else %}—{% endif %}</div>
+          <div><strong class="text-[#F3F4F6]">Reason:</strong> {% if f %}{{ f.reason|default:'(no reason recorded)' }}{% else %}(no reason recorded){% endif %}</div>
+          <div><strong class="text-[#F3F4F6]">Budget lost (est.):</strong> ${{ card.budget_lost_estimate }}</div>
+          <div><strong class="text-[#F3F4F6]">Days lost:</strong> {{ card.total_days_lost }}</div>
+          <div><strong class="text-[#F3F4F6]">Burn rate:</strong> {{ card.burn_rate|floatformat:1 }}</div>
+          <div><strong class="text-[#F3F4F6]">Severity:</strong> {{ card.severity }} / 100</div>
+          <div><strong class="text-[#F3F4F6]">Urgent advice:</strong> {{ card.advice }}</div>
         </div>
 
         <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div class="flex flex-wrap gap-2">
-            <a href="{% url 'projects:edit' p.id %}" class="px-3 py-1 rounded bg-white/5 text-sm text-white">Open</a>
-            <a href="{% url 'projects:restart' p.id %}" class="px-3 py-1 rounded border border-rose-600 bg-rose-700/20 text-sm text-rose-100 hover:bg-rose-600/30">Restart with roadmap</a>
+            <a href="{% url 'projects:edit' p.id %}" class="rounded-full border border-[#262626] bg-[#161616] px-3 py-1 text-sm text-[#F3F4F6]">Open</a>
+            <a href="{% url 'projects:restart' p.id %}" class="rounded-full border border-[#EF4444]/40 bg-[#1B0A0A] px-3 py-1 text-sm text-[#FCA5A5] hover:bg-[#2A0D0D]">Restart with roadmap</a>
           </div>
-          <div class="text-xs text-rose-300">Failed entries: {{ card.failure_count }}</div>
+          <div class="text-xs text-[#FCA5A5]">Failed entries: {{ card.failure_count }}</div>
         </div>
       </article>
       {% endwith %}
     {% empty %}
-      <div class="col-span-full text-slate-400">No failed projects yet — keep shipping!</div>
+      <div class="col-span-full rounded-[1.5rem] border border-dashed border-[#262626] bg-[#111111] p-6 text-[#9CA3AF]">No failed projects yet — keep shipping!</div>
     {% endfor %}
-  </div>
+  </section>
 </div>
 
 {% endblock %}

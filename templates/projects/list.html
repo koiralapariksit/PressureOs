@@ -1,58 +1,58 @@
 {% extends 'base.html' %}
 {% block title %}Projects | Pressure OS{% endblock %}
 {% block content %}
-<div class="space-y-6">
-  <div class="flex flex-col gap-3 rounded-[1.75rem] border border-white/10 bg-white/5 p-6 shadow-[0_18px_80px_rgba(0,0,0,0.28)] lg:flex-row lg:items-end lg:justify-between">
+<div class="space-y-5">
+  <div class="flex flex-col gap-3 rounded-[1.75rem] border border-[#262626] bg-[#111111] p-5 sm:p-6 lg:flex-row lg:items-end lg:justify-between">
     <div>
-      <p class="text-xs uppercase tracking-[0.45em] text-gold-400">Mission control</p>
-      <h1 class="mt-2 text-3xl font-semibold text-white">Project management</h1>
-      <p class="mt-2 max-w-2xl text-sm text-slate-400">Create, edit, archive, complete, and track every initiative from one place.</p>
+      <p class="text-[0.68rem] uppercase tracking-[0.5em] text-[#C9A961]">Mission control</p>
+      <h1 class="mt-2 text-3xl font-semibold text-[#F3F4F6]">Project management</h1>
+      <p class="mt-2 max-w-2xl text-sm text-[#9CA3AF]">Create, edit, archive, complete, and track every initiative from one command surface.</p>
     </div>
-    <a href="{% url 'projects:create' %}" class="inline-flex items-center justify-center rounded-full border border-gold-400/40 bg-gold-500/15 px-4 py-2 text-sm font-medium text-gold-200 transition hover:bg-gold-500/25">New project</a>
+    <a href="{% url 'projects:create' %}" class="inline-flex items-center justify-center rounded-full border border-[#C9A961]/60 bg-[#161616] px-4 py-2 text-sm font-medium text-[#C9A961] transition hover:border-[#F3F4F6] hover:text-[#F3F4F6]">New project</a>
   </div>
 
   <div class="grid gap-4">
     {% for project in projects %}
-      <div class="rounded-[1.5rem] border border-white/10 bg-black/30 p-5 shadow-[0_12px_50px_rgba(0,0,0,0.25)]">
+      <div class="rounded-[1.5rem] border border-[#262626] bg-[#111111] p-5">
         <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div class="space-y-3">
             <div class="flex flex-wrap items-center gap-2">
-              <h2 class="text-xl font-semibold text-white">{{ project.title }}</h2>
-              <span class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.3em] text-slate-300">{{ project.get_status_display }}</span>
-              <span class="rounded-full border border-gold-400/30 bg-gold-500/10 px-3 py-1 text-xs uppercase tracking-[0.3em] text-gold-200">{{ project.get_priority_display }}</span>
+              <h2 class="text-xl font-semibold text-[#F3F4F6]">{{ project.title }}</h2>
+              <span class="rounded-full border border-[#262626] bg-[#161616] px-3 py-1 text-[0.62rem] uppercase tracking-[0.36em] text-[#9CA3AF]">{{ project.get_status_display }}</span>
+              <span class="rounded-full border border-[#C9A961]/40 bg-[#161616] px-3 py-1 text-[0.62rem] uppercase tracking-[0.36em] text-[#C9A961]">{{ project.get_priority_display }}</span>
             </div>
-            <p class="max-w-2xl text-sm text-slate-400">{{ project.description|default:"No description added yet." }}</p>
-            <div class="flex flex-wrap gap-4 text-sm text-slate-300">
-              <span>Start date: {{ project.start_date }}</span>
-              <span>Deadline: {{ project.deadline }}</span>
-              <span>Difficulty: {{ project.get_difficulty_display }}</span>
-              <span>Target hours: {{ project.target_hours }}</span>
-              <span>Expected daily: {{ project.expected_daily_hours }}</span>
+            <p class="max-w-2xl text-sm text-[#9CA3AF]">{{ project.description|default:"Mission details not assigned yet." }}</p>
+            <div class="flex flex-wrap gap-4 text-sm text-[#9CA3AF]">
+              <span>Start date: <span class="text-[#F3F4F6]">{{ project.start_date }}</span></span>
+              <span>Deadline: <span class="text-[#F3F4F6]">{{ project.deadline }}</span></span>
+              <span>Difficulty: <span class="text-[#F3F4F6]">{{ project.get_difficulty_display }}</span></span>
+              <span>Target hours: <span class="text-[#F3F4F6]">{{ project.target_hours }}</span></span>
+              <span>Expected daily: <span class="text-[#F3F4F6]">{{ project.expected_daily_hours }}</span></span>
             </div>
-            <div class="flex flex-wrap gap-4 text-sm text-slate-300">
-              <span>Days remaining: {{ project.days_remaining }}</span>
-              <span>Time used: {{ project.time_progress_percentage }}%</span>
-              <span>Time remaining: {{ project.time_remaining_percentage }}%</span>
-              <span>Pressure: {{ project.project_status }}</span>
-              <span>Estimated finish: {{ project.estimated_finish_date }}</span>
+            <div class="flex flex-wrap gap-4 text-sm text-[#9CA3AF]">
+              <span>Days remaining: <span class="text-[#F3F4F6]">{{ project.days_remaining }}</span></span>
+              <span>Time used: <span class="text-[#F3F4F6]">{{ project.time_progress_percentage }}%</span></span>
+              <span>Time remaining: <span class="text-[#F3F4F6]">{{ project.time_remaining_percentage }}%</span></span>
+              <span>Pressure: <span class="text-[#F3F4F6]">{{ project.project_status }}</span></span>
+              <span>Estimated finish: <span class="text-[#F3F4F6]">{{ project.estimated_finish_date }}</span></span>
             </div>
             {% if project.github_repository %}
-              <a href="{{ project.github_repository }}" target="_blank" rel="noopener noreferrer" class="inline-flex text-sm text-gold-300 hover:text-gold-200">View GitHub</a>
+              <a href="{{ project.github_repository }}" target="_blank" rel="noopener noreferrer" class="inline-flex text-sm text-[#C9A961] hover:text-[#F3F4F6]">View GitHub</a>
             {% endif %}
           </div>
           <div class="flex flex-wrap gap-2">
-            <a href="{% url 'projects:edit' project.pk %}" class="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 transition hover:bg-white/10">Edit</a>
-            <a href="{% url 'projects:archive' project.pk %}" class="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 transition hover:bg-white/10">Archive</a>
+            <a href="{% url 'projects:edit' project.pk %}" class="rounded-full border border-[#262626] bg-[#161616] px-3 py-2 text-sm text-[#F3F4F6] transition hover:border-[#C9A961] hover:text-[#C9A961]">Edit</a>
+            <a href="{% url 'projects:archive' project.pk %}" class="rounded-full border border-[#262626] bg-[#161616] px-3 py-2 text-sm text-[#F3F4F6] transition hover:border-[#C9A961] hover:text-[#C9A961]">Archive</a>
             {% if project.status != 'completed' %}
-              <a href="{% url 'projects:complete' project.pk %}" class="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200 transition hover:bg-emerald-500/20">Complete</a>
+              <a href="{% url 'projects:complete' project.pk %}" class="rounded-full border border-[#10B981]/40 bg-[#081410] px-3 py-2 text-sm text-[#A7F3D0] transition hover:border-[#10B981] hover:text-[#D1FAE5]">Complete</a>
             {% endif %}
-            <a href="{% url 'projects:delete' project.pk %}" class="rounded-full border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200 transition hover:bg-red-500/20">Delete</a>
+            <a href="{% url 'projects:delete' project.pk %}" class="rounded-full border border-[#EF4444]/40 bg-[#1B0A0A] px-3 py-2 text-sm text-[#FCA5A5] transition hover:border-[#EF4444] hover:text-[#FEE2E2]">Delete</a>
           </div>
         </div>
       </div>
     {% empty %}
-      <div class="rounded-[1.5rem] border border-dashed border-white/10 bg-white/5 p-8 text-center text-slate-400">
-        No projects yet. Create your first mission to start tracking execution.
+      <div class="rounded-[1.5rem] border border-dashed border-[#262626] bg-[#111111] p-8 text-center text-[#9CA3AF]">
+        Mission not assigned.
       </div>
     {% endfor %}
   </div>
