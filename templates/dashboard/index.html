@@ -35,12 +35,30 @@
         </div>
         <div class="rounded-2xl border border-gold-400/20 bg-gold-400/10 px-4 py-3 text-center {{ pressure_panel_class }}">
           <p class="text-[0.65rem] uppercase tracking-[0.4em] text-slate-400">Countdown</p>
-          <p class="mt-2 text-2xl font-semibold text-gold-400">{{ countdown }}</p>
+          <p class="mt-2 text-2xl font-semibold text-gold-400">{{ countdown }} days</p>
         </div>
       </div>
       <div class="mt-6 grid gap-4 md:grid-cols-2">
         {% include "components/metric_card.html" with title="Pressure Meter" value=pressure_meter|add:"%" subtitle="Current pressure intensity" icon="⏱" %}
         {% include "components/metric_card.html" with title="Completion %" value=completion_percent|add:"%" subtitle="Progress to target" icon="▣" %}
+      </div>
+      <div class="mt-6 rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
+        <div class="flex items-center justify-between gap-4">
+          <div>
+            <p class="text-xs uppercase tracking-[0.35em] text-slate-400">Deadline card</p>
+            <p class="mt-2 text-lg font-semibold text-white">{{ project.deadline }}</p>
+          </div>
+          <div class="rounded-full border border-gold-400/30 bg-gold-500/10 px-3 py-2 text-xs uppercase tracking-[0.3em] text-gold-200">{{ pressure_level }}</div>
+        </div>
+        <div class="mt-4 space-y-2 text-sm text-slate-300">
+          <div class="flex items-center justify-between"><span>Days elapsed</span><span>{{ days_elapsed }} / {{ total_days }}</span></div>
+          <div class="flex items-center justify-between"><span>Time used</span><span>{{ time_progress_percentage }}%</span></div>
+          <div class="flex items-center justify-between"><span>Time remaining</span><span>{{ time_remaining_percentage }}%</span></div>
+          <div class="flex items-center justify-between"><span>Estimated finish</span><span>{{ estimated_finish_date }}</span></div>
+        </div>
+        <div class="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
+          <div class="h-full rounded-full bg-gradient-to-r from-gold-400 via-amber-400 to-emerald-400 transition-all duration-700" style="width: {{ time_progress_percentage }}%"></div>
+        </div>
       </div>
     </div>
 

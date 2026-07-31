@@ -16,10 +16,16 @@
     <div>
       <label class="mb-2 block text-sm text-slate-300" for="id_username">{{ form.username.label }}</label>
       {{ form.username }}
+      {% if form.username.errors %}
+        <div class="mt-2 text-sm text-red-200">{{ form.username.errors|striptags }}</div>
+      {% endif %}
     </div>
     <div>
       <label class="mb-2 block text-sm text-slate-300" for="id_password">{{ form.password.label }}</label>
       {{ form.password }}
+      {% if form.password.errors %}
+        <div class="mt-2 text-sm text-red-200">{{ form.password.errors|striptags }}</div>
+      {% endif %}
     </div>
     <div class="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
       <label class="flex items-center gap-3 text-sm text-slate-300">

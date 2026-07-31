@@ -28,11 +28,14 @@ class AIJudgeService:
         budget_state = self._get_budget_state()
         failures = FailureRecord.objects.filter(project__owner=self.user).count()
         deadline = project.deadline if project else today
-        remaining_days = max((deadline - today).days, 0) if deadline else 0
+        remaining_days = project.days_remaining if project else 0
+        days_elapsed = project.days_elapsed if project else 0
+        total_days = project.total_days if project else 1
+        time_progress_percentage = project.time_progress_percentage if project else 0
         current_pace = self._current_pace(project, daily_log)
         success_probability = self._calculate_probability(project, average_hours, current_pace, consistency, budget_state["current_budget"], failures, remaining_days)
-        reality_report = self._build_reality_report(project, daily_log, average_hours, consistency, budget_state, failures, remaining_days, current_pace)
-        recovery_plan = self._build_recovery_plan(project, average_hours, consistency, budget_state, failures, remaining_days, current_pace)
+        reality_report = self._build_reality_report(project, daily_log, average_hours, consistency, budget_state, failures, remaining_days, current_pace, days_elapsed, total_days, time_progress_percentage)
+        recovery_plan = self._build_recovery_plan(project, average_hours, consistency, budget_state, failures, remaining_days, current_pace, time_progress_percentage)
         verdict = self._determine_verdict(success_probability)
 
         return {
@@ -49,6 +52,10 @@ class AIJudgeService:
             "consistency": consistency,
             "failure_streak": failures,
             "current_pace": current_pace,
+            "days_elapsed": days_elapsed,
+            "days_remaining": remaining_days,
+            "total_days": total_days,
+            "time_progress_percentage": time_progress_percentage,
         }
 
     def _get_primary_project(self):
@@ -98,7 +105,7 @@ class AIJudgeService:
             score -= 20
         return max(0, min(100, score))
 
-    def _build_reality_report(self, project, daily_log, average_hours, consistency, budget_state, failures, remaining_days, current_pace):
+    def _build_reality_report(self, project, daily_log, average_hours, consistency, budget_state, failures, remaining_days, current_pace, days_elapsed, total_days, time_progress_percentage):
         if not project:
             return "No active project exists, so there is no current execution signal to judge."
         parts = []
@@ -106,18 +113,19 @@ class AIJudgeService:
             parts.append(f"Today you logged {daily_log.hours_worked} hours against {project.title}.")
         else:
             parts.append(f"No work log exists for today, so the current day is still unverified.")
+        parts.append(f"You have used {time_progress_percentage}% of your available time across {days_elapsed} of {total_days} days, leaving only {remaining_days} days remaining.")
         parts.append(f"Your recent average is {average_hours} hours per day, and your consistency score is {consistency}%.")
-        parts.append(f"You have {remaining_days} days remaining, and your current pace is {current_pace} hours/day against a required {project.expected_daily_hours} hours/day.")
+        parts.append(f"Current pace is {current_pace} hours/day against a required {project.expected_daily_hours} hours/day, so the remaining schedule is now {project.project_status.lower()}.")
         parts.append(f"Budget remaining is Rs.{budget_state['current_budget']}, with Rs.{budget_state['money_lost']} already lost and {failures} recorded failure(s).")
         return " ".join(parts)
 
-    def _build_recovery_plan(self, project, average_hours, consistency, budget_state, failures, remaining_days, current_pace):
+    def _build_recovery_plan(self, project, average_hours, consistency, budget_state, failures, remaining_days, current_pace, time_progress_percentage):
         if not project:
             return "Create or assign a project before you attempt a recovery plan."
         gap = max(float(project.expected_daily_hours) - current_pace, 0)
         required_hours = max(0, round(gap + (float(project.target_hours) / max(remaining_days, 1) - current_pace), 2))
         actions = []
-        actions.append(f"Close the gap by targeting at least {required_hours:.2f} hours tomorrow.")
+        actions.append(f"You have used {time_progress_percentage}% of your available time, so the next working day should target at least {required_hours:.2f} hours.")
         if consistency < 70:
             actions.append("Reduce distractions and log the work the same day instead of deferring it.")
         if budget_state["current_budget"] <= Decimal("2000"):

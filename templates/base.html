@@ -4,6 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Pressure OS{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -39,7 +41,76 @@
       .animate-glow { animation: glowPulse 2.4s ease-in-out infinite; }
       @keyframes floatUp { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
       .animate-float { animation: floatUp 3s ease-in-out infinite; }
+      .flatpickr-calendar {
+        background: rgba(10, 10, 10, 0.95);
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 1rem;
+        box-shadow: 0 24px 80px rgba(0,0,0,0.45);
+        backdrop-filter: blur(24px);
+      }
+      .flatpickr-calendar .flatpickr-months .flatpickr-month,
+      .flatpickr-calendar .flatpickr-weekday,
+      .flatpickr-calendar .flatpickr-day {
+        color: #e5e7eb;
+      }
+      .flatpickr-calendar .flatpickr-day:hover,
+      .flatpickr-calendar .flatpickr-day.today:hover {
+        background: rgba(202,162,74,0.24);
+        border-color: rgba(202,162,74,0.7);
+      }
+      .flatpickr-calendar .flatpickr-day.today {
+        border-color: rgba(202,162,74,0.75);
+        background: rgba(202,162,74,0.16);
+        color: #fef3c7;
+      }
+      .flatpickr-calendar .flatpickr-day.selected {
+        background: linear-gradient(135deg, rgba(202,162,74,0.95), rgba(245,158,11,0.8));
+        border-color: rgba(202,162,74,0.9);
+        color: #111827;
+        font-weight: 700;
+        box-shadow: 0 10px 30px rgba(202,162,74,0.28);
+      }
+      .flatpickr-calendar .flatpickr-day.disabled,
+      .flatpickr-calendar .flatpickr-day.disabled:hover {
+        color: rgba(148,163,184,0.45);
+        background: transparent;
+      }
+      .flatpickr-calendar .flatpickr-nav {
+        color: #f8fafc;
+      }
+      .flatpickr-calendar .flatpickr-months .flatpickr-prev-month,
+      .flatpickr-calendar .flatpickr-months .flatpickr-next-month {
+        color: #f8fafc;
+      }
+      .flatpickr-calendar .flatpickr-months .flatpickr-prev-month:hover,
+      .flatpickr-calendar .flatpickr-months .flatpickr-next-month:hover {
+        background: rgba(255,255,255,0.06);
+      }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        flatpickr('[data-flatpickr="true"]', {
+          altInput: false,
+          dateFormat: 'Y-m-d',
+          minDate: 'today',
+          disableMobile: true,
+          monthSelectorType: 'static',
+          showMonths: 1,
+          allowInput: false,
+          animate: true,
+          clickOpens: true,
+          prevArrow: '←',
+          nextArrow: '→',
+          onReady: function () {
+            const calendar = document.querySelector('.flatpickr-calendar');
+            if (calendar) {
+              calendar.classList.add('animate-float');
+            }
+          }
+        });
+      });
+    </script>
   </head>
   <body class="min-h-full bg-[radial-gradient(circle_at_top_left,_rgba(202,162,74,0.16),_transparent_35%),linear-gradient(135deg,#020202_0%,#0d0d0d_60%,#050505_100%)] text-slate-100 theme-{{ pressure_theme|default:'default' }}">
     <div class="min-h-screen px-4 py-4 sm:px-6 lg:px-8">

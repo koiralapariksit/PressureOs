@@ -17,6 +17,45 @@ class ProjectWorkflowTests(TestCase):
         )
         self.client.force_login(self.user)
 
+    def test_deadline_engine_properties_are_reusable_and_time_based(self):
+        today = timezone.localdate()
+        project = Project.objects.create(
+            owner=self.user,
+            title="Launch beta",
+            start_date=today - timedelta(days=1),
+            deadline=today + timedelta(days=7),
+            target_hours=40,
+            expected_daily_hours=4,
+            progress_percent=25,
+        )
+
+        self.assertEqual(project.total_days, 8)
+        self.assertEqual(project.days_elapsed, 1)
+        self.assertEqual(project.days_remaining, 7)
+        self.assertEqual(project.time_progress_percentage, 12.5)
+        self.assertEqual(project.time_remaining_percentage, 87.5)
+        self.assertFalse(project.deadline_passed)
+        self.assertEqual(project.project_status, "Moderate")
+
+    def test_past_deadline_is_rejected_on_backend(self):
+        response = self.client.post(
+            reverse("projects:create"),
+            {
+                "title": "Historic mission",
+                "description": "This should fail.",
+                "start_date": (timezone.localdate() - timedelta(days=1)).isoformat(),
+                "deadline": (timezone.localdate() - timedelta(days=1)).isoformat(),
+                "target_hours": 24,
+                "expected_daily_hours": 4,
+                "priority": "high",
+                "github_repository": "https://github.com/example/onboarding",
+                "progress_percent": 10,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Project.objects.filter(title="Historic mission").exists())
+
     def test_project_metrics_are_calculated(self):
         project = Project.objects.create(
             owner=self.user,

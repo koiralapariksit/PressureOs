@@ -1,9 +1,9 @@
 from django.contrib import messages
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.mail import send_mail
-from django.shortcuts import redirect, render
+from django.http import HttpResponseRedirect
+from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView
 
@@ -18,17 +18,32 @@ class LoginView(auth_views.LoginView):
 
     def form_valid(self, form):
         remember_me = form.cleaned_data.get("remember_me")
-        if not remember_me:
-            self.request.session.set_expiry(0)
-        else:
+        if remember_me:
             self.request.session.set_expiry(1209600)
+        else:
+            self.request.session.set_expiry(0)
         login(self.request, form.get_user())
         messages.success(self.request, "You are inside the system.")
-        return redirect(self.get_success_url())
+        return HttpResponseRedirect(self.get_success_url())
+
+    def form_invalid(self, form):
+        messages.error(self.request, "The username or password you entered is incorrect.")
+        return super().form_invalid(form)
 
 
 class LogoutView(auth_views.LogoutView):
     next_page = reverse_lazy("core:home")
+    http_method_names = ["get", "post", "options", "head"]
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.method.lower() in {"get", "post"}:
+            return self.get(request, *args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        logout(request)
+        messages.success(request, "You have been signed out.")
+        return redirect(self.get_default_redirect_url())
 
 
 class RegisterView(CreateView):

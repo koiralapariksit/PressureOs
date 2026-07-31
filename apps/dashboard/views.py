@@ -29,6 +29,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         today_hours = sum(float(entry.hours_worked) for entry in today_logs) if today_logs.exists() else 0
         focus_minutes = PomodoroSession.objects.filter(owner=user, completed=True).aggregate(total=Sum("focus_minutes"))["total"] or 0
         focus_hours = round(focus_minutes / 60, 1)
+        required_hours_today = round(max(float(project.expected_daily_hours) - today_hours, 0), 1) if project.pk else 0
 
         latest_budget = BudgetHistory.objects.filter(owner=user).order_by("-created_at").first()
         stats = Statistics.objects.filter(owner=user).first()
@@ -80,8 +81,17 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             "page_title": "Execution Dashboard",
             "project": project,
             "today_mission": project.title if project.pk else "Define the first mission",
-            "countdown": (project.deadline - today).days,
+            "countdown": project.days_remaining,
             "completion_percent": completion_percent,
+            "days_elapsed": project.days_elapsed,
+            "days_remaining": project.days_remaining,
+            "total_days": project.total_days,
+            "time_progress_percentage": project.time_progress_percentage,
+            "time_remaining_percentage": project.time_remaining_percentage,
+            "deadline_passed": project.deadline_passed,
+            "estimated_finish_date": project.estimated_finish_date,
+            "pressure_level": project.project_status,
+            "required_hours_today": required_hours_today,
             "pressure_meter": pressure_state["score"],
             "pressure_label": pressure_state["label"],
             "pressure_description": pressure_state["description"],
