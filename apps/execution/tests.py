@@ -55,3 +55,30 @@ class ExecutionTrackingTests(TestCase):
 
         self.assertEqual(updated_session.status, FocusSession.Status.PAUSED)
         self.assertTrue(SessionPause.objects.filter(focus_session=session, reason="idle_timeout").exists())
+
+    def test_build_operational_context_exposes_timeline_and_reality_facts(self):
+        session = FocusSession.objects.create(
+            owner=self.user,
+            project=self.project,
+            operation_name="Launch review",
+            status=FocusSession.Status.RUNNING,
+            started_at=timezone.now() - timezone.timedelta(minutes=45),
+            active_seconds=1800,
+            paused_seconds=600,
+            total_seconds=2400,
+        )
+        SessionPause.objects.create(
+            focus_session=session,
+            started_at=timezone.now() - timezone.timedelta(minutes=20),
+            ended_at=timezone.now() - timezone.timedelta(minutes=10),
+            duration_seconds=600,
+            reason="manual",
+        )
+
+        context = ExecutionService.build_operational_context(self.user, session=session)
+
+        self.assertIn("timeline", context)
+        self.assertIn("reality_facts", context)
+        self.assertIn("mission_map", context)
+        self.assertGreaterEqual(len(context["timeline"]), 1)
+        self.assertGreaterEqual(len(context["reality_facts"]), 3)

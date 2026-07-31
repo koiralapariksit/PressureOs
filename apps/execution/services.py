@@ -7,6 +7,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from apps.execution.models import DailyWorkSummary, FocusSession, SessionPause
+from apps.projects.models import Project
 
 
 class ExecutionService:
@@ -119,7 +120,7 @@ class ExecutionService:
     def build_session_payload(owner, session: FocusSession | None = None) -> dict[str, Any]:
         session = session or FocusSession.objects.filter(owner=owner, status__in=[FocusSession.Status.RUNNING, FocusSession.Status.PAUSED]).order_by("-started_at").first()
         summary = ExecutionService.get_today_summary(owner)
-        return {
+        payload = {
             "session": session,
             "summary": summary,
             "active_session_exists": session is not None,
@@ -128,4 +129,53 @@ class ExecutionService:
             "total_active_seconds": summary.total_active_seconds if summary else 0,
             "total_active_hours": Decimal(str((summary.total_active_seconds if summary else 0) / 3600)).quantize(Decimal("0.01")) if summary else Decimal("0.00"),
             "status_label": session.get_status_display() if session else "Idle",
+        }
+        payload.update(ExecutionService.build_operational_context(owner, session=session))
+        return payload
+
+    @staticmethod
+    def build_operational_context(owner, session: FocusSession | None = None) -> dict[str, Any]:
+        session = session or FocusSession.objects.filter(owner=owner, status__in=[FocusSession.Status.RUNNING, FocusSession.Status.PAUSED]).order_by("-started_at").first()
+        summary = ExecutionService.get_today_summary(owner)
+        projects = Project.objects.filter(owner=owner, is_active=True).order_by("deadline")[:6]
+        timeline = []
+        if session:
+            timeline.append({"kind": "start", "label": "Mission started", "detail": session.operation_name or "Focus operation", "time": session.started_at})
+            for pause in session.pauses.all():
+                timeline.append({"kind": "pause", "label": "Paused", "detail": pause.reason or "Pause", "time": pause.started_at})
+        if summary:
+            timeline.append({"kind": "summary", "label": "Daily summary", "detail": f"{summary.total_seconds // 3600}h tracked", "time": timezone.now()})
+        timeline.sort(key=lambda item: item["time"], reverse=True)
+
+        reality_facts = []
+        if summary:
+            reality_facts.append(f"Today contains {summary.total_seconds // 3600}h of tracked execution.")
+            reality_facts.append(f"Average session length is {summary.average_session_seconds // 60 if summary.average_session_seconds else 0} minutes.")
+            reality_facts.append(f"The longest session reached {summary.longest_session_seconds // 60 if summary.longest_session_seconds else 0} minutes.")
+        else:
+            reality_facts.append("No execution data has been logged for today yet.")
+            reality_facts.append("Start a mission to create the first operational record.")
+            reality_facts.append("Idle time will be surfaced once the session is active.")
+
+        mission_map = []
+        for project in projects:
+            pressure = project.pressure_level
+            mission_map.append({
+                "title": project.title,
+                "deadline": project.deadline,
+                "pressure": pressure,
+                "days_remaining": project.days_remaining,
+                "completion_percent": project.progress_percent,
+                "dependency": "None" if project.priority != "critical" else "Critical path",
+                "risk": "Low" if project.progress_percent >= 70 else "Watch",
+            })
+
+        return {
+            "timeline": timeline,
+            "reality_facts": reality_facts,
+            "mission_map": mission_map,
+            "pressure_level": session.project.pressure_level if session and session.project else "Stable",
+            "pressure_score": 72 if session else 58,
+            "execution_score": 88 if summary and summary.total_seconds else 74,
+            "consistency_score": 83 if summary else 69,
         }

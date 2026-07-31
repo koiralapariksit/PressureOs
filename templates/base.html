@@ -151,7 +151,42 @@
               window.location.href = target.getAttribute('href');
             }
           }
+          if (event.ctrlKey && event.key === 'k') {
+            event.preventDefault();
+            const palette = document.getElementById('command-palette');
+            if (palette) {
+              palette.classList.remove('hidden');
+              const input = document.getElementById('command-search');
+              if (input) {
+                input.focus();
+              }
+            }
+          }
+          if (event.key === 'Escape') {
+            const palette = document.getElementById('command-palette');
+            if (palette && !palette.classList.contains('hidden')) {
+              palette.classList.add('hidden');
+            }
+          }
         });
+
+        const paletteToggle = document.getElementById('command-palette-toggle');
+        const palette = document.getElementById('command-palette');
+        const closePalette = document.getElementById('command-palette-close');
+        if (paletteToggle && palette) {
+          paletteToggle.addEventListener('click', function () {
+            palette.classList.toggle('hidden');
+            const input = document.getElementById('command-search');
+            if (!palette.classList.contains('hidden') && input) {
+              input.focus();
+            }
+          });
+        }
+        if (closePalette && palette) {
+          closePalette.addEventListener('click', function () {
+            palette.classList.add('hidden');
+          });
+        }
       });
     </script>
   </head>
@@ -159,6 +194,23 @@
     <div class="min-h-screen px-4 py-4 sm:px-6 lg:px-8">
       <div class="mx-auto flex max-w-[1600px] flex-col overflow-hidden rounded-[28px] border border-[#262626] bg-[#0D0D0D] shadow-[0_20px_120px_rgba(0,0,0,0.5)] {{ pressure_shell_class }}">
         {% include "partials/navbar.html" %}
+        {% if execution_status %}
+        <div class="border-b border-[#262626] bg-[#0D0D0D] px-4 py-3 sm:px-6 lg:px-8">
+          <div class="mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-3 rounded-[1.1rem] border border-[#262626] bg-[#111111] px-4 py-3 text-sm text-[#9CA3AF]">
+            <div class="flex flex-wrap items-center gap-3">
+              <span class="rounded-full border border-[#262626] bg-[#161616] px-3 py-1 text-[0.62rem] uppercase tracking-[0.35em] text-[#C9A961]">Mission status</span>
+              <span class="mono-numbers text-[#F3F4F6]">{{ execution_status.status_label|default:"Idle" }}</span>
+              <span class="text-[#262626]">•</span>
+              <span>{{ execution_status.session.operation_name|default:"Ready for mission" }}</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-3">
+              <span class="mono-numbers text-[#F3F4F6]">{{ execution_status.total_active_hours|default:0 }}h</span>
+              <span class="text-[#262626]">•</span>
+              <span>{{ execution_status.session.project.title|default:"No active project" }}</span>
+            </div>
+          </div>
+        </div>
+        {% endif %}
         <div class="flex flex-col lg:flex-row">
           {% include "partials/sidebar.html" %}
           <main class="flex-1 p-4 sm:p-6 lg:p-8">
@@ -175,6 +227,36 @@
           </main>
         </div>
         {% include "partials/footer.html" %}
+      </div>
+    </div>
+
+    <a href="{% url 'execution:control' %}" class="fixed bottom-5 right-5 z-50 rounded-full border border-[#C9A961]/50 bg-[#111111] px-4 py-3 text-sm font-medium text-[#C9A961] shadow-[0_12px_60px_rgba(0,0,0,0.45)] transition hover:border-[#F3F4F6] hover:text-[#F3F4F6]">⚡ Mission</a>
+
+    <div id="command-palette" class="fixed inset-0 z-[60] hidden items-center justify-center bg-[rgba(0,0,0,0.72)] px-4">
+      <div class="w-full max-w-xl rounded-[1.5rem] border border-[#262626] bg-[#111111] p-4 shadow-[0_24px_120px_rgba(0,0,0,0.6)]">
+        <div class="flex items-center justify-between gap-3">
+          <div class="text-sm text-[#9CA3AF]">Command palette</div>
+          <button id="command-palette-close" type="button" class="rounded-full border border-[#262626] bg-[#161616] px-3 py-2 text-xs text-[#F3F4F6]">Esc</button>
+        </div>
+        <input id="command-search" type="text" placeholder="Search missions, actions, and routes" class="mt-4" />
+        <div class="mt-4 space-y-2">
+          <a href="{% url 'execution:control' %}" class="flex items-center justify-between rounded-[1rem] border border-[#262626] bg-[#161616] px-3 py-3 text-sm text-[#F3F4F6]">
+            <span>Start Mission</span>
+            <span class="text-xs text-[#9CA3AF]">Mission Control</span>
+          </a>
+          <a href="{% url 'tracker:checkin' %}" class="flex items-center justify-between rounded-[1rem] border border-[#262626] bg-[#161616] px-3 py-3 text-sm text-[#F3F4F6]">
+            <span>Daily Check-in</span>
+            <span class="text-xs text-[#9CA3AF]">Tracker</span>
+          </a>
+          <a href="{% url 'ai_judge:index' %}" class="flex items-center justify-between rounded-[1rem] border border-[#262626] bg-[#161616] px-3 py-3 text-sm text-[#F3F4F6]">
+            <span>Open AI Judge</span>
+            <span class="text-xs text-[#9CA3AF]">Review</span>
+          </a>
+          <a href="{% url 'projects:list' %}" class="flex items-center justify-between rounded-[1rem] border border-[#262626] bg-[#161616] px-3 py-3 text-sm text-[#F3F4F6]">
+            <span>Search Projects</span>
+            <span class="text-xs text-[#9CA3AF]">Project board</span>
+          </a>
+        </div>
       </div>
     </div>
   </body>
