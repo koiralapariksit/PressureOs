@@ -49,10 +49,30 @@ class DailyCheckInView(LoginRequiredMixin, FormView):
         return kwargs
 
     def form_valid(self, form):
-        daily_log = form.save(commit=False)
-        daily_log.owner = self.request.user
-        daily_log.log_date = timezone.localdate()
-        daily_log.save()
+        project = form.cleaned_data["project"]
+        lookup_kwargs = {
+            "owner": self.request.user,
+            "project": project,
+            "log_date": timezone.localdate(),
+        }
+        defaults = {
+            "hours_worked": form.cleaned_data["hours_worked"],
+            "tasks_finished": form.cleaned_data["tasks_finished"],
+            "notes": form.cleaned_data["notes"],
+            "energy_level": form.cleaned_data["energy_level"],
+            "github_commits": form.cleaned_data["github_commits"],
+            "distractions": form.cleaned_data["distractions"],
+            "completed": form.cleaned_data["completed"],
+        }
+
+        screenshot = form.cleaned_data.get("screenshot_proof")
+        if screenshot is not None:
+            defaults["screenshot_proof"] = screenshot
+
+        daily_log, _ = DailyLog.objects.update_or_create(
+            defaults=defaults,
+            **lookup_kwargs,
+        )
         self._refresh_statistics_and_budget()
         return super().form_valid(form)
 

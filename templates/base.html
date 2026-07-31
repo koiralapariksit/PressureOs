@@ -52,7 +52,7 @@
         color: #F3F4F6;
         padding: 0.8rem 0.95rem;
         outline: none;
-        transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+        transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, transform 0.18s ease;
       }
       input:focus, textarea:focus, select:focus {
         border-color: #C9A961;
@@ -61,11 +61,27 @@
       }
       button {
         cursor: pointer;
+        transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
+      }
+      button:hover, a:hover {
+        transform: translateY(-1px);
       }
       .glass { background: rgba(10, 10, 10, 0.9); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
       .hud-panel { background: #111111; border: 1px solid #262626; }
       .hud-subtle { background: #161616; border: 1px solid #262626; }
       .mono-numbers { font-variant-numeric: tabular-nums; }
+      main section,
+      main div[class*='rounded-['] {
+        transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+      }
       @keyframes heartbeat { 0%, 100% { border-color: rgba(38, 38, 38, 0.95); } 50% { border-color: rgba(239, 68, 68, 0.72); } }
       .pressured-border { animation: heartbeat 2.8s ease-in-out infinite; }
       .flatpickr-calendar {

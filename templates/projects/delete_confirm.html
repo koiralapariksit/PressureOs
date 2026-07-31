@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
 {% block title %}Delete Project | Pressure OS{% endblock %}
 {% block content %}
-<div class="mx-auto max-w-2xl rounded-[1.75rem] border border-red-500/20 bg-black/30 p-8 shadow-[0_18px_80px_rgba(0,0,0,0.28)]">
-  <p class="text-xs uppercase tracking-[0.45em] text-gold-400">Removal</p>
-  <h1 class="mt-2 text-3xl font-semibold text-white">Delete project</h1>
-  <p class="mt-4 text-slate-400">Are you sure you want to delete <span class="font-semibold text-white">{{ object.title }}</span>?</p>
+<div class="mx-auto max-w-2xl rounded-[1.75rem] border border-[#262626] bg-[#111111] p-8">
+  <p class="text-[0.62rem] uppercase tracking-[0.38em] text-[#C9A961]">Removal</p>
+  <h1 class="mt-2 text-3xl font-semibold text-[#F3F4F6]">Delete project</h1>
+  <p class="mt-4 text-[#9CA3AF]">Are you sure you want to delete <span class="font-semibold text-[#F3F4F6]">{{ object.title }}</span>?</p>
   <form method="post" class="mt-6 flex items-center justify-end gap-3">
     {% csrf_token %}
-    <a href="{% url 'projects:list' %}" class="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200">Cancel</a>
-    <button type="submit" class="rounded-full border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-200">Delete forever</button>
+    <a href="{% url 'projects:list' %}" class="rounded-full border border-[#262626] bg-[#161616] px-4 py-2 text-sm text-[#F3F4F6] transition hover:border-[#C9A961] hover:text-[#C9A961]">Cancel</a>
+    <button type="submit" class="rounded-full border border-[#EF4444]/40 bg-[#1B0A0A] px-4 py-2 text-sm font-medium text-[#FCA5A5] transition hover:bg-[#2A0D0D]">Delete forever</button>
   </form>
 </div>
 {% endblock %}
