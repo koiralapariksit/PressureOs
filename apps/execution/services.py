@@ -12,6 +12,38 @@ from apps.projects.models import Project
 
 class ExecutionService:
     @staticmethod
+    def format_duration(seconds: int) -> str:
+        hours, remainder = divmod(max(0, int(seconds)), 3600)
+        minutes, seconds = divmod(remainder, 60)
+        return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+
+    @staticmethod
+    def get_elapsed_seconds(session: FocusSession | None, now: Any | None = None) -> int:
+        if session is None:
+            return 0
+        if session.status == FocusSession.Status.COMPLETED:
+            return session.total_seconds
+
+        now = now or timezone.now()
+        elapsed = max(0, int((now - session.started_at).total_seconds()))
+        open_pause_seconds = 0
+        if session.status == FocusSession.Status.PAUSED:
+            pause = session.pauses.filter(ended_at__isnull=True).order_by("-started_at").first()
+            if pause:
+                open_pause_seconds = max(0, int((now - pause.started_at).total_seconds()))
+        return max(0, session.active_seconds + elapsed - session.paused_seconds - open_pause_seconds)
+
+    @staticmethod
+    def get_control_state(session: FocusSession | None) -> dict[str, bool]:
+        if session is None:
+            return {"can_start": True, "can_pause": False, "can_resume": False, "can_finish": False, "can_abort": False}
+        if session.status == FocusSession.Status.RUNNING:
+            return {"can_start": False, "can_pause": True, "can_resume": False, "can_finish": True, "can_abort": True}
+        if session.status == FocusSession.Status.PAUSED:
+            return {"can_start": False, "can_pause": False, "can_resume": True, "can_finish": True, "can_abort": True}
+        return {"can_start": True, "can_pause": False, "can_resume": False, "can_finish": False, "can_abort": False}
+
+    @staticmethod
     def get_or_create_active_session(owner, project=None, operation_name="") -> FocusSession:
         session = FocusSession.objects.filter(owner=owner, status__in=[FocusSession.Status.RUNNING, FocusSession.Status.PAUSED]).order_by("-started_at").first()
         if session:
@@ -27,7 +59,7 @@ class ExecutionService:
 
     @staticmethod
     def pause_session(session: FocusSession, reason: str = "manual") -> FocusSession:
-        if session.status == FocusSession.Status.PAUSED or session.status == FocusSession.Status.COMPLETED:
+        if session.status != FocusSession.Status.RUNNING:
             return session
 
         SessionPause.objects.create(focus_session=session, started_at=timezone.now(), reason=reason)
@@ -50,6 +82,7 @@ class ExecutionService:
         return session
 
     @staticmethod
+    @transaction.atomic
     def resume_session(session: FocusSession) -> FocusSession:
         if session.status != FocusSession.Status.PAUSED:
             return session
@@ -60,7 +93,8 @@ class ExecutionService:
             active_pause.save(update_fields=["ended_at", "duration_seconds"])
             session.paused_seconds += active_pause.duration_seconds
         session.status = FocusSession.Status.RUNNING
-        session.save(update_fields=["status", "paused_seconds", "updated_at"])
+        session.last_activity_at = timezone.now()
+        session.save(update_fields=["status", "paused_seconds", "last_activity_at", "updated_at"])
         return session
 
     @staticmethod
@@ -77,16 +111,30 @@ class ExecutionService:
             active_pause.save(update_fields=["ended_at", "duration_seconds"])
             session.paused_seconds += active_pause.duration_seconds
 
-        elapsed_seconds = max(0, int((now - session.started_at).total_seconds()))
-        if session.status == FocusSession.Status.RUNNING:
-            session.active_seconds += elapsed_seconds
-        else:
-            session.active_seconds += max(0, elapsed_seconds - session.paused_seconds)
-
+        session.active_seconds = ExecutionService.get_elapsed_seconds(session, now=now)
         session.total_seconds = session.active_seconds
         session.ended_at = now
         session.status = FocusSession.Status.COMPLETED
         session.save(update_fields=["active_seconds", "paused_seconds", "total_seconds", "ended_at", "status", "updated_at"])
+        return session
+
+    @staticmethod
+    @transaction.atomic
+    def abort_session(session: FocusSession) -> FocusSession:
+        if session.status in [FocusSession.Status.COMPLETED, FocusSession.Status.ABORTED]:
+            return session
+        now = timezone.now()
+        active_pause = session.pauses.filter(ended_at__isnull=True).order_by("-started_at").first()
+        if active_pause:
+            active_pause.ended_at = now
+            active_pause.duration_seconds = max(0, int((now - active_pause.started_at).total_seconds()))
+            active_pause.save(update_fields=["ended_at", "duration_seconds"])
+            session.paused_seconds += active_pause.duration_seconds
+        session.active_seconds = ExecutionService.get_elapsed_seconds(session, now=now)
+        session.total_seconds = session.active_seconds
+        session.ended_at = now
+        session.status = FocusSession.Status.ABORTED
+        session.save(update_fields=["active_seconds", "total_seconds", "paused_seconds", "ended_at", "status", "updated_at"])
         return session
 
     @staticmethod
@@ -120,6 +168,8 @@ class ExecutionService:
     def build_session_payload(owner, session: FocusSession | None = None) -> dict[str, Any]:
         session = session or FocusSession.objects.filter(owner=owner, status__in=[FocusSession.Status.RUNNING, FocusSession.Status.PAUSED]).order_by("-started_at").first()
         summary = ExecutionService.get_today_summary(owner)
+        elapsed_seconds = ExecutionService.get_elapsed_seconds(session)
+        live_metrics = ExecutionService.build_live_metrics(owner)
         payload = {
             "session": session,
             "summary": summary,
@@ -129,9 +179,41 @@ class ExecutionService:
             "total_active_seconds": summary.total_active_seconds if summary else 0,
             "total_active_hours": Decimal(str((summary.total_active_seconds if summary else 0) / 3600)).quantize(Decimal("0.01")) if summary else Decimal("0.00"),
             "status_label": session.get_status_display() if session else "Idle",
+            "elapsed_seconds": elapsed_seconds,
+            "elapsed_display": ExecutionService.format_duration(elapsed_seconds),
+            "control_state": ExecutionService.get_control_state(session),
+            "live_metrics": live_metrics,
         }
         payload.update(ExecutionService.build_operational_context(owner, session=session))
         return payload
+
+    @staticmethod
+    def build_live_metrics(owner) -> dict[str, Any]:
+        today = timezone.localdate()
+        sessions = list(
+            FocusSession.objects.filter(owner=owner, started_at__date=today)
+            .select_related("project")
+            .prefetch_related("pauses")
+        )
+        active_seconds = sum(ExecutionService.get_elapsed_seconds(session) for session in sessions if session.status in [FocusSession.Status.RUNNING, FocusSession.Status.PAUSED])
+        completed_seconds = sum(session.total_seconds for session in sessions if session.status == FocusSession.Status.COMPLETED)
+        focus_seconds = active_seconds + completed_seconds
+        completed_sessions = [session for session in sessions if session.status == FocusSession.Status.COMPLETED]
+        total_sessions = len(completed_sessions)
+        average_seconds = int(sum(session.total_seconds for session in completed_sessions) / total_sessions) if total_sessions else 0
+        longest_seconds = max((session.total_seconds for session in completed_sessions), default=0)
+        paused_seconds = sum(session.paused_seconds for session in sessions)
+        denominator = focus_seconds + paused_seconds
+        return {
+            "focus_seconds": focus_seconds,
+            "focus_display": ExecutionService.format_duration(focus_seconds),
+            "paused_seconds": paused_seconds,
+            "paused_display": ExecutionService.format_duration(paused_seconds),
+            "completed_sessions": total_sessions,
+            "average_display": ExecutionService.format_duration(average_seconds),
+            "longest_display": ExecutionService.format_duration(longest_seconds),
+            "deep_work_percent": round((focus_seconds / denominator) * 100) if denominator else 0,
+        }
 
     @staticmethod
     def build_operational_context(owner, session: FocusSession | None = None) -> dict[str, Any]:

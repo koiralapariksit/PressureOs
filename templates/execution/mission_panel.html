@@ -1,31 +1,45 @@
-{% if session %}
-<div class="rounded-[1.25rem] border border-[#262626] bg-[#161616] p-4">
-  <div class="flex items-center justify-between">
-    <div>
-      <p class="text-[0.62rem] uppercase tracking-[0.42em] text-[#C9A961]">Mission activity</p>
-      <h3 class="mt-2 text-lg font-semibold text-[#F3F4F6]">{{ session.operation_name|default:"Focus operation" }}</h3>
-    </div>
-    <div class="rounded-full border border-[#262626] bg-[#111111] px-3 py-2 text-xs uppercase tracking-[0.35em] text-[#C9A961]">{{ status_label }}</div>
-  </div>
-  <div class="mt-4 grid gap-3 sm:grid-cols-2">
-    <div class="rounded-[1rem] border border-[#262626] bg-[#111111] p-3">
-      <p class="text-[0.62rem] uppercase tracking-[0.42em] text-[#9CA3AF]">Today's focus time</p>
-      <p class="mono-numbers mt-2 text-xl font-semibold text-[#F3F4F6]">{{ total_active_hours }}h</p>
-    </div>
-    <div class="rounded-[1rem] border border-[#262626] bg-[#111111] p-3">
-      <p class="text-[0.62rem] uppercase tracking-[0.42em] text-[#9CA3AF]">Current session</p>
-      <p class="mono-numbers mt-2 text-xl font-semibold text-[#F3F4F6]">{{ session.started_at|timesince }}</p>
-    </div>
-    <div class="rounded-[1rem] border border-[#262626] bg-[#111111] p-3">
-      <p class="text-[0.62rem] uppercase tracking-[0.42em] text-[#9CA3AF]">Longest session</p>
-      <p class="mono-numbers mt-2 text-xl font-semibold text-[#F3F4F6]">{{ summary.longest_session_seconds|default:0 }}s</p>
-    </div>
-    <div class="rounded-[1rem] border border-[#262626] bg-[#111111] p-3">
-      <p class="text-[0.62rem] uppercase tracking-[0.42em] text-[#9CA3AF]">Daily target progress</p>
-      <p class="mono-numbers mt-2 text-xl font-semibold text-[#F3F4F6]">{{ focus_sessions_count }} sessions</p>
-    </div>
+{% if is_htmx %}
+<div id="mission-live-rail" hx-swap-oob="true" class="border-b border-[#262626] bg-[#0D0D0D] px-4 py-3 sm:px-6 lg:px-8">
+  <div class="mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-3 rounded-[1.1rem] border border-[#262626] bg-[#111111] px-4 py-3 text-sm text-[#9CA3AF]">
+    <div class="flex flex-wrap items-center gap-3"><span class="rounded-full border border-[#262626] bg-[#161616] px-3 py-1 text-[0.62rem] uppercase tracking-[0.35em] text-[#C9A961]">Mission status</span><span class="text-[#F3F4F6]">{{ status_label|default:"Idle" }}</span>{% if session %}<span class="text-[#262626]">•</span><span>{{ session.operation_name|default:"Focus operation" }}</span>{% endif %}</div>
+    <div class="flex flex-wrap items-center gap-3">{% if session %}<span class="mono-numbers text-[#F3F4F6]">{{ live_metrics.focus_display }}</span><span class="text-[#262626]">•</span><span>{{ session.project.title|default:"No active project" }}</span>{% else %}<span>No active project</span>{% endif %}</div>
   </div>
 </div>
-{% else %}
-<div class="rounded-[1.25rem] border border-[#262626] bg-[#161616] p-4 text-sm text-[#9CA3AF]">No active mission. Start the next operation from the mission control panel.</div>
+{% include "execution/mission_launch.html" with oob=True %}
 {% endif %}
+<div class="py-8 sm:py-12">
+  <div class="flex items-center justify-between gap-4">
+    <div>
+      <p class="mc-muted text-[0.65rem] uppercase tracking-[0.34em]">Current operation</p>
+      <h2 class="mt-2 text-2xl font-semibold text-[#F3F4F6]">{{ session.operation_name|default:"No mission selected" }}</h2>
+      <p class="mc-muted mt-1 text-sm">{{ session.project.title|default:"Choose a project before starting" }}</p>
+    </div>
+    <div class="flex items-center gap-2 text-sm"><span class="mc-status-dot {% if session.status == 'running' %}mc-running{% elif session.status == 'paused' %}mc-paused{% elif session.status == 'aborted' %}mc-aborted{% else %}mc-idle{% endif %}"></span><span class="text-[#F3F4F6]">{{ status_label|default:"Idle" }}</span></div>
+  </div>
+
+  <div class="py-12 text-center sm:py-16">
+    <p class="mc-muted text-[0.65rem] uppercase tracking-[0.42em]">Focus timer</p>
+    <p class="mono-numbers mt-4 text-7xl font-semibold tracking-[-0.06em] text-[#F3F4F6] sm:text-9xl">{{ elapsed_display|default:"00:00:00" }}</p>
+    {% if session %}
+      <div class="mt-6 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm">
+        <span><span class="mc-muted">Started</span> <span class="mono-numbers ml-2 text-[#F3F4F6]">{{ session.started_at|date:"H:i" }}</span></span>
+        <span><span class="mc-muted">Today's total</span> <span class="mono-numbers ml-2 text-[#F3F4F6]">{{ live_metrics.focus_display }}</span></span>
+        <span><span class="mc-muted">Goal remaining</span> <span class="mono-numbers ml-2 text-[#F3F4F6]">{% if session.project %}{{ session.project.required_hours_per_day }}h/day{% else %}--{% endif %}</span></span>
+      </div>
+    {% endif %}
+  </div>
+
+  {% if session %}
+    <div class="flex flex-wrap justify-center gap-3 border-t mc-rule pt-8">
+      {% if session.status == 'running' %}
+        <form method="post" hx-post="{% url 'execution:action' %}" hx-target="#mission-live" hx-swap="innerHTML" hx-sync="#mission-live:drop" hx-disabled-elt="button"><input type="hidden" name="action" value="pause">{% csrf_token %}<button type="submit" class="mc-action px-7 text-sm font-semibold uppercase tracking-[0.16em]">Pause <span class="htmx-indicator">...</span></button></form>
+      {% elif session.status == 'paused' %}
+        <form method="post" hx-post="{% url 'execution:action' %}" hx-target="#mission-live" hx-swap="innerHTML" hx-sync="#mission-live:drop" hx-disabled-elt="button"><input type="hidden" name="action" value="resume">{% csrf_token %}<button type="submit" class="mc-action mc-primary px-7 text-sm font-semibold uppercase tracking-[0.16em]">Resume <span class="htmx-indicator">...</span></button></form>
+      {% endif %}
+      {% if session.status == 'running' or session.status == 'paused' %}
+        <form method="post" hx-post="{% url 'execution:action' %}" hx-target="#mission-live" hx-swap="innerHTML" hx-sync="#mission-live:drop" hx-disabled-elt="button"><input type="hidden" name="action" value="finish">{% csrf_token %}<button type="submit" class="mc-action mc-primary px-7 text-sm font-semibold uppercase tracking-[0.16em]" hx-confirm="Finish this mission?">Finish <span class="htmx-indicator">...</span></button></form>
+        <form method="post" hx-post="{% url 'execution:action' %}" hx-target="#mission-live" hx-swap="innerHTML" hx-sync="#mission-live:drop" hx-disabled-elt="button"><input type="hidden" name="action" value="abort">{% csrf_token %}<button type="submit" class="mc-action mc-danger px-7 text-sm font-semibold uppercase tracking-[0.16em]" hx-confirm="Abort this mission?">Abort <span class="htmx-indicator">...</span></button></form>
+      {% endif %}
+    </div>
+  {% endif %}
+</div>

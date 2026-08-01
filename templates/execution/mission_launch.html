@@ -1,0 +1,18 @@
+<section id="mission-launch"{% if oob %} hx-swap-oob="outerHTML"{% endif %} class="mt-8 border-t mc-rule pt-8">
+  {% if session %}
+    <div class="flex items-center justify-between gap-4 text-sm">
+      <div><p class="mc-muted text-[0.65rem] uppercase tracking-[0.28em]">Mission locked</p><p class="mt-2 text-[#F3F4F6]">{{ session.project.title|default:"Unassigned" }} · {{ session.operation_name|default:"Focus operation" }}</p></div>
+      <span class="mc-muted">Project selection is locked while active</span>
+    </div>
+  {% else %}
+    <form method="post" hx-post="{% url 'execution:start' %}" hx-target="#mission-live" hx-swap="innerHTML" hx-sync="#mission-live:drop" hx-disabled-elt="button" class="mx-auto max-w-2xl">
+      {% csrf_token %}<input type="hidden" name="action" value="start">
+      <div class="grid gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+        <label class="block text-left"><span class="mc-muted text-xs uppercase tracking-[0.24em]">Project</span>{{ form.project }}</label>
+        <label class="block text-left"><span class="mc-muted text-xs uppercase tracking-[0.24em]">Mission</span>{{ form.operation_name }}</label>
+        <button type="submit" class="mc-action mc-primary inline-flex items-center justify-center gap-2 px-6 text-sm font-semibold uppercase tracking-[0.18em]">Start <span class="htmx-indicator text-xs">...</span></button>
+      </div>
+      {% if form.errors %}<p class="mt-3 text-sm text-red-300">Choose a project and name the mission before starting.</p>{% endif %}
+    </form>
+  {% endif %}
+</section>

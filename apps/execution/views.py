@@ -12,11 +12,18 @@ from apps.execution.services import ExecutionService
 
 
 class ExecutionDashboardView(LoginRequiredMixin, TemplateView):
-    template_name = "execution/mission_panel.html"
+    template_name = "execution/mission_control.html"
+
+    def get_template_names(self):
+        if self.request.headers.get("HX-Request"):
+            return ["execution/mission_panel.html"]
+        return [self.template_name]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update(ExecutionService.build_session_payload(self.request.user))
+        context["form"] = FocusSessionForm(user=self.request.user)
+        context["is_htmx"] = bool(self.request.headers.get("HX-Request"))
         return context
 
 
@@ -41,6 +48,7 @@ class FocusSessionCreateView(LoginRequiredMixin, FormView):
         if self.request.headers.get("HX-Request"):
             context = ExecutionService.build_session_payload(self.request.user, session=session)
             context["form"] = FocusSessionForm(user=self.request.user)
+            context["is_htmx"] = True
             return render(self.request, "execution/mission_panel.html", context)
         return redirect(self.success_url)
 
@@ -63,6 +71,7 @@ class FocusSessionActionView(LoginRequiredMixin, TemplateView):
                 if request.headers.get("HX-Request"):
                     context = ExecutionService.build_session_payload(request.user, session=session)
                     context["form"] = FocusSessionForm(user=request.user)
+                    context["is_htmx"] = True
                     return render(request, "execution/mission_panel.html", context)
                 return redirect("execution:control")
             return redirect("execution:control")
@@ -73,12 +82,15 @@ class FocusSessionActionView(LoginRequiredMixin, TemplateView):
             ExecutionService.resume_session(session)
         elif action == "finish":
             ExecutionService.finish_session(session)
+        elif action == "abort":
+            ExecutionService.abort_session(session)
         elif action == "end_day":
             ExecutionService.refresh_daily_summary(request.user.id, timezone.localdate())
 
         if request.headers.get("HX-Request"):
             context = ExecutionService.build_session_payload(request.user, session=session)
             context["form"] = FocusSessionForm(user=request.user)
+            context["is_htmx"] = True
             return render(request, "execution/mission_panel.html", context)
         return redirect("execution:control")
 
@@ -90,4 +102,5 @@ class ExecutionControlView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context.update(ExecutionService.build_session_payload(self.request.user))
         context["form"] = FocusSessionForm(user=self.request.user)
+        context["is_htmx"] = False
         return context

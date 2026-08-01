@@ -14,6 +14,7 @@ class FocusSession(models.Model):
         RUNNING = "running", "Running"
         PAUSED = "paused", "Paused"
         COMPLETED = "completed", "Completed"
+        ABORTED = "aborted", "Aborted"
 
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="focus_sessions")
     project = models.ForeignKey("projects.Project", on_delete=models.CASCADE, related_name="focus_sessions", blank=True, null=True)

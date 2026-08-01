@@ -82,3 +82,27 @@ class ExecutionTrackingTests(TestCase):
         self.assertIn("mission_map", context)
         self.assertGreaterEqual(len(context["timeline"]), 1)
         self.assertGreaterEqual(len(context["reality_facts"]), 3)
+
+    def test_mission_payload_exposes_live_metrics_and_valid_controls(self):
+        session = FocusSession.objects.create(
+            owner=self.user,
+            project=self.project,
+            operation_name="Control room",
+            status=FocusSession.Status.RUNNING,
+        )
+
+        payload = ExecutionService.build_session_payload(self.user, session=session)
+
+        self.assertEqual(payload["status_label"], "Running")
+        self.assertIn("live_metrics", payload)
+        self.assertTrue(payload["control_state"]["can_pause"])
+        self.assertFalse(payload["control_state"]["can_resume"])
+
+    def test_abort_session_is_terminal(self):
+        session = FocusSession.objects.create(owner=self.user, project=self.project, status=FocusSession.Status.RUNNING)
+
+        ExecutionService.abort_session(session)
+        session.refresh_from_db()
+
+        self.assertEqual(session.status, FocusSession.Status.ABORTED)
+        self.assertEqual(ExecutionService.abort_session(session).status, FocusSession.Status.ABORTED)
