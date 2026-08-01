@@ -383,6 +383,19 @@ class ExecutionService:
         return DailyWorkSummary.objects.filter(owner=owner, log_date=timezone.localdate()).first()
 
     @staticmethod
+    def get_project_hours_for_today(owner, project: Project | None) -> Decimal:
+        if project is None:
+            return Decimal("0.00")
+        sessions = FocusSession.objects.filter(
+            owner=owner,
+            project=project,
+            started_at__date=timezone.localdate(),
+            status__in=[FocusSession.Status.RUNNING, FocusSession.Status.PAUSED, FocusSession.Status.COMPLETED],
+        )
+        total_seconds = sum(ExecutionService.get_elapsed_seconds(session) for session in sessions)
+        return Decimal(str(total_seconds / 3600)).quantize(Decimal("0.01"))
+
+    @staticmethod
     def build_session_payload(owner, session: FocusSession | None = None) -> dict[str, Any]:
         filtered_session = session or FocusSession.objects.filter(owner=owner, status__in=[FocusSession.Status.RUNNING, FocusSession.Status.PAUSED]).order_by("-started_at").first()
         if filtered_session and filtered_session.status not in [FocusSession.Status.RUNNING, FocusSession.Status.PAUSED]:

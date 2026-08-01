@@ -6,6 +6,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
+from apps.execution.models import FocusSession
 from apps.projects.models import Project
 from apps.tracker.models import DailyLog
 
@@ -80,3 +81,22 @@ class DailyCheckInTests(TestCase):
         self.assertEqual(daily_log.tasks_finished, 1)
         self.assertEqual(daily_log.notes, "Updated submission.")
         self.assertTrue(daily_log.completed)
+
+    def test_project_hours_lookup_returns_selected_project_execution_time(self):
+        self.assertTrue(self.client.login(username="trackeruser", password="secret123"))
+        FocusSession.objects.create(
+            owner=self.user,
+            project=self.project,
+            operation_name="Shipping review",
+            status=FocusSession.Status.COMPLETED,
+            total_seconds=3600,
+        )
+
+        response = self.client.get(
+            reverse("tracker:project_hours"),
+            {"project": self.project.pk},
+            HTTP_HX_REQUEST="true",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'value="1.00"')

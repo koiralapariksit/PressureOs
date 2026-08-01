@@ -2,10 +2,12 @@ from decimal import Decimal
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.forms import ModelForm
+from django.http import HttpResponse
 from django.shortcuts import redirect
+from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.utils import timezone
-from django.views.generic import FormView, TemplateView
+from django.views.generic import FormView, TemplateView, View
 
 from apps.ai_judge.services import AIJudgeService
 from apps.analytics.models import Achievement, Statistics
@@ -36,15 +38,17 @@ class DailyCheckInForm(ModelForm):
         super().__init__(*args, **kwargs)
         if self.user:
             self.fields["project"].queryset = Project.objects.filter(owner=self.user).order_by("deadline")
+            self.fields["project"].widget.attrs.update({
+                "hx-get": reverse_lazy("tracker:project_hours"),
+                "hx-target": "#id_hours_worked",
+                "hx-swap": "outerHTML",
+                "hx-trigger": "change",
+            })
         self.fields["completed"].required = False
         self.fields["hours_worked"].required = False
-        self.fields["hours_worked"].widget.attrs["readonly"] = True
-        summary = ExecutionService.get_today_summary(self.user) if self.user else None
-        if summary:
-            hours_value = round(summary.total_seconds / 3600, 2)
-            self.fields["hours_worked"].initial = hours_value
-            self.fields["tasks_finished"].initial = summary.focus_sessions_count
-            self.fields["notes"].initial = f"Auto-generated from {summary.focus_sessions_count} focus sessions."
+        self.fields["hours_worked"].initial = Decimal("0.00")
+        self.fields["hours_worked"].widget.attrs["min"] = "0"
+        self.fields["hours_worked"].widget.attrs["step"] = "0.01"
 
 
 class DailyCheckInView(LoginRequiredMixin, FormView):
@@ -64,10 +68,9 @@ class DailyCheckInView(LoginRequiredMixin, FormView):
             "project": project,
             "log_date": timezone.localdate(),
         }
-        summary = ExecutionService.get_today_summary(self.request.user)
         hours_worked = form.cleaned_data.get("hours_worked")
-        if hours_worked in {None, ""} and summary:
-            hours_worked = round(summary.total_seconds / 3600, 2)
+        if hours_worked in {None, ""}:
+            hours_worked = ExecutionService.get_project_hours_for_today(self.request.user, project)
         defaults = {
             "hours_worked": hours_worked or Decimal("0.00"),
             "tasks_finished": form.cleaned_data["tasks_finished"],
@@ -121,6 +124,23 @@ class DailyCheckInView(LoginRequiredMixin, FormView):
             BudgetHistory.apply_penalty(owner, failure_count, reason="Daily check-in missed")
         elif total_logs and completed_logs == total_logs:
             BudgetHistory.reset_budget(owner, reason="Successful day")
+
+
+class ProjectHoursLookupView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        project_id = request.GET.get("project")
+        project = None
+        if project_id:
+            project = Project.objects.filter(owner=request.user, pk=project_id).first()
+        hours_value = ExecutionService.get_project_hours_for_today(request.user, project)
+        html = render_to_string(
+            "tracker/partials/project_hours_field.html",
+            {
+                "hours_value": hours_value,
+                "form": DailyCheckInForm(user=request.user),
+            },
+        )
+        return HttpResponse(html)
 
 
 class DailyCheckInSuccessView(LoginRequiredMixin, TemplateView):
