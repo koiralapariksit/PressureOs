@@ -11,12 +11,14 @@
   .mission-control .mc-paused { background: #d2b36a; box-shadow: 0 0 0 .3rem rgba(210,179,106,.12); }
   .mission-control .mc-idle { background: #69717b; }
   .mission-control .mc-aborted { background: #d26d6d; box-shadow: 0 0 0 .3rem rgba(210,109,109,.12); }
-  .mission-control .mc-action { min-width: 9.5rem; height: 3.1rem; border: 1px solid var(--mc-line); transition: border-color .18s ease, background .18s ease, transform .18s ease, opacity .18s ease; }
-  .mission-control .mc-action:hover { border-color: rgba(210,179,106,.7); background: rgba(255,255,255,.06); transform: translateY(-1px); }
+  .mission-control .mc-action { min-width: 9.5rem; height: 3.1rem; border: 1px solid var(--mc-line); cursor: pointer; user-select: none; touch-action: manipulation; will-change: transform; transition: border-color .18s ease, background .18s ease, transform .18s ease, opacity .18s ease, box-shadow .18s ease; box-shadow: inset 0 0 0 1px transparent; }
+  .mission-control .mc-action:hover { border-color: rgba(210,179,106,.7); background: rgba(255,255,255,.06); transform: translateY(-1px); box-shadow: inset 0 0 0 1px rgba(210,179,106,.15); }
+  .mission-control .mc-action:active { transform: translateY(0); }
   .mission-control .mc-action:focus-visible { outline: 2px solid var(--mc-gold); outline-offset: 3px; }
+  .mission-control .mc-action:disabled { cursor: not-allowed; opacity: .55; transform: none; pointer-events: none; }
   .mission-control .mc-primary { background: rgba(210,179,106,.14); border-color: rgba(210,179,106,.65); color: #f1d99a; }
   .mission-control .mc-danger { color: #e7a0a0; }
-  .mission-control form.htmx-request button { opacity: .55; pointer-events: none; }
+  .mission-control form.htmx-request button { opacity: .55; pointer-events: none; transform: none; }
   .mission-control .htmx-indicator { opacity: 0; transition: opacity .18s ease; }
   .mission-control form.htmx-request .htmx-indicator { opacity: 1; }
   @keyframes mc-pulse { 0%,100% { opacity: 1; } 50% { opacity: .55; } }
@@ -41,7 +43,7 @@
   <div class="grid gap-10 xl:grid-cols-[minmax(0,1fr)_22rem]">
     <main>
       <div id="mission-live" class="border mc-rule">
-        <div id="mission-live-panel" hx-get="{% url 'execution:panel' %}" hx-trigger="every 1s" hx-target="this" hx-swap="innerHTML" hx-sync="#mission-live-panel:drop" aria-live="polite">
+        <div id="mission-live-panel" hx-get="{% url 'execution:panel' %}" hx-trigger="every 1s" hx-target="#mission-panel" hx-select="#mission-panel" hx-swap="innerHTML" hx-sync="#mission-live-panel:drop" aria-live="polite">
           {% include "execution/mission_panel.html" %}
         </div>
       </div>

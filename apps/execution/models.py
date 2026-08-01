@@ -16,6 +16,11 @@ class FocusSession(models.Model):
         COMPLETED = "completed", "Completed"
         ABORTED = "aborted", "Aborted"
 
+    class Phase(models.TextChoices):
+        WORK = "work", "Work"
+        SHORT_BREAK = "short_break", "Short break"
+        LONG_BREAK = "long_break", "Long break"
+
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="focus_sessions")
     project = models.ForeignKey("projects.Project", on_delete=models.CASCADE, related_name="focus_sessions", blank=True, null=True)
     operation_name = models.CharField(max_length=200, blank=True)
@@ -27,6 +32,16 @@ class FocusSession(models.Model):
     total_seconds = models.PositiveIntegerField(default=0, validators=[validate_non_negative])
     last_activity_at = models.DateTimeField(default=timezone.now)
     idle_reason = models.CharField(max_length=100, blank=True)
+    work_duration = models.PositiveIntegerField(default=1500, validators=[validate_positive])
+    break_duration = models.PositiveIntegerField(default=300, validators=[validate_positive])
+    long_break_duration = models.PositiveIntegerField(default=900, validators=[validate_positive])
+    long_break_every = models.PositiveIntegerField(default=4, validators=[validate_positive])
+    cycle_number = models.PositiveIntegerField(default=1, validators=[validate_positive])
+    completed_cycles = models.PositiveIntegerField(default=0, validators=[validate_non_negative])
+    current_phase = models.CharField(max_length=20, choices=Phase.choices, default=Phase.WORK)
+    phase_started_at = models.DateTimeField(default=timezone.now)
+    interruptions = models.PositiveIntegerField(default=0, validators=[validate_non_negative])
+    paused_time = models.PositiveIntegerField(default=0, validators=[validate_non_negative])
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -70,6 +85,20 @@ class SessionPause(models.Model):
 
     def __str__(self) -> str:
         return f"Pause for {self.focus_session_id}"
+
+
+class FocusSessionEvent(models.Model):
+    focus_session = models.ForeignKey(FocusSession, on_delete=models.CASCADE, related_name="events")
+    kind = models.CharField(max_length=40, default="timeline")
+    label = models.CharField(max_length=120)
+    detail = models.CharField(max_length=240, blank=True)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return f"{self.kind} - {self.label}"
 
 
 class DailyWorkSummary(models.Model):

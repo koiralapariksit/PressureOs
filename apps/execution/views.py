@@ -80,6 +80,12 @@ class FocusSessionActionView(LoginRequiredMixin, TemplateView):
             ExecutionService.pause_session(session)
         elif action == "resume":
             ExecutionService.resume_session(session)
+        elif action == "interrupt":
+            ExecutionService.record_interrupt(session)
+        elif action == "skip_break":
+            ExecutionService.skip_break(session)
+        elif action == "reset":
+            ExecutionService.reset_pomodoro(session)
         elif action == "finish":
             ExecutionService.finish_session(session)
         elif action == "abort":

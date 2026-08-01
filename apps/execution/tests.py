@@ -115,3 +115,56 @@ class ExecutionTrackingTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "execution/mission_panel.html")
         self.assertContains(response, 'id="mission-panel"')
+
+    def test_session_starts_with_default_pomodoro_engine_state(self):
+        session = FocusSession.objects.create(
+            owner=self.user,
+            project=self.project,
+            operation_name="Mission launch",
+            status=FocusSession.Status.RUNNING,
+        )
+
+        payload = ExecutionService.build_session_payload(self.user, session=session)
+        pomodoro = payload["pomodoro"]
+
+        self.assertEqual(pomodoro["phase"], "work")
+        self.assertEqual(pomodoro["work_duration"], 1500)
+        self.assertEqual(pomodoro["break_duration"], 300)
+        self.assertEqual(pomodoro["cycle_number"], 1)
+        self.assertEqual(pomodoro["interruptions"], 0)
+
+    def test_interrupting_session_updates_pomodoro_interruptions(self):
+        session = FocusSession.objects.create(
+            owner=self.user,
+            project=self.project,
+            operation_name="Mission launch",
+            status=FocusSession.Status.RUNNING,
+            interruptions=0,
+        )
+
+        updated = ExecutionService.record_interrupt(session)
+        updated.refresh_from_db()
+
+        self.assertEqual(updated.interruptions, 1)
+        self.assertEqual(updated.status, FocusSession.Status.RUNNING)
+
+    def test_break_transition_updates_cycle_context(self):
+        session = FocusSession.objects.create(
+            owner=self.user,
+            project=self.project,
+            operation_name="Mission launch",
+            status=FocusSession.Status.RUNNING,
+            current_phase="work",
+            cycle_number=2,
+            completed_cycles=1,
+            phase_started_at=timezone.now() - timezone.timedelta(minutes=26),
+            work_duration=1500,
+            break_duration=300,
+        )
+
+        updated = ExecutionService.advance_pomodoro_phase(session)
+        updated.refresh_from_db()
+
+        self.assertEqual(updated.current_phase, "short_break")
+        self.assertEqual(updated.completed_cycles, 1)
+        self.assertEqual(updated.cycle_number, 2)
