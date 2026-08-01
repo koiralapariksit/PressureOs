@@ -166,25 +166,28 @@ class ExecutionService:
 
     @staticmethod
     def build_session_payload(owner, session: FocusSession | None = None) -> dict[str, Any]:
-        session = session or FocusSession.objects.filter(owner=owner, status__in=[FocusSession.Status.RUNNING, FocusSession.Status.PAUSED]).order_by("-started_at").first()
+        filtered_session = session or FocusSession.objects.filter(owner=owner, status__in=[FocusSession.Status.RUNNING, FocusSession.Status.PAUSED]).order_by("-started_at").first()
+        if filtered_session and filtered_session.status not in [FocusSession.Status.RUNNING, FocusSession.Status.PAUSED]:
+            filtered_session = None
+
         summary = ExecutionService.get_today_summary(owner)
-        elapsed_seconds = ExecutionService.get_elapsed_seconds(session)
+        elapsed_seconds = ExecutionService.get_elapsed_seconds(filtered_session)
         live_metrics = ExecutionService.build_live_metrics(owner)
         payload = {
-            "session": session,
+            "session": filtered_session,
             "summary": summary,
-            "active_session_exists": session is not None,
+            "active_session_exists": filtered_session is not None,
             "hours_for_checkin": Decimal(str((summary.total_seconds if summary else 0) / 3600)).quantize(Decimal("0.01")) if summary else Decimal("0.00"),
             "focus_sessions_count": summary.focus_sessions_count if summary else 0,
             "total_active_seconds": summary.total_active_seconds if summary else 0,
             "total_active_hours": Decimal(str((summary.total_active_seconds if summary else 0) / 3600)).quantize(Decimal("0.01")) if summary else Decimal("0.00"),
-            "status_label": session.get_status_display() if session else "Idle",
+            "status_label": filtered_session.get_status_display() if filtered_session else "Idle",
             "elapsed_seconds": elapsed_seconds,
             "elapsed_display": ExecutionService.format_duration(elapsed_seconds),
-            "control_state": ExecutionService.get_control_state(session),
+            "control_state": ExecutionService.get_control_state(filtered_session),
             "live_metrics": live_metrics,
         }
-        payload.update(ExecutionService.build_operational_context(owner, session=session))
+        payload.update(ExecutionService.build_operational_context(owner, session=filtered_session))
         return payload
 
     @staticmethod

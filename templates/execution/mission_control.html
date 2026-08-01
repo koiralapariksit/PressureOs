@@ -40,8 +40,10 @@
 
   <div class="grid gap-10 xl:grid-cols-[minmax(0,1fr)_22rem]">
     <main>
-      <div id="mission-live" class="border mc-rule" hx-get="{% url 'execution:panel' %}" hx-trigger="every 1s" hx-target="this" hx-swap="innerHTML" aria-live="polite">
-        {% include "execution/mission_panel.html" %}
+      <div id="mission-live" class="border mc-rule">
+        <div id="mission-live-panel" hx-get="{% url 'execution:panel' %}" hx-trigger="every 1s" hx-target="this" hx-swap="innerHTML" hx-sync="#mission-live-panel:drop" aria-live="polite">
+          {% include "execution/mission_panel.html" %}
+        </div>
       </div>
 
       {% include "execution/mission_launch.html" %}
@@ -90,16 +92,21 @@
 <script>
   document.addEventListener('keydown', function (event) {
     if (event.target.matches('input, textarea, select')) return;
-    const panel = document.getElementById('mission-panel');
-    if (!panel) return;
+
+    const livePanel = document.getElementById('mission-live-panel');
+    const startForm = document.querySelector('#mission-launch form');
+
     if (event.code === 'Space') {
       event.preventDefault();
-      const action = panel.querySelector('input[name="action"][value="pause"], input[name="action"][value="resume"]');
+      if (!livePanel) return;
+      const action = livePanel.querySelector('input[name="action"][value="pause"], input[name="action"][value="resume"]');
       if (action) action.closest('form').querySelector('button').click();
     }
-    if (event.code === 'Enter') {
-      const start = panel.querySelector('input[name="action"][value="start"]');
-      if (start) start.closest('form').querySelector('button').click();
+
+    if (event.code === 'Enter' && startForm) {
+      event.preventDefault();
+      const submitButton = startForm.querySelector('button[type="submit"]');
+      if (submitButton) submitButton.click();
     }
   });
 </script>

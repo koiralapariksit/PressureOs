@@ -5,9 +5,8 @@
     <div class="flex flex-wrap items-center gap-3">{% if session %}<span class="mono-numbers text-[#F3F4F6]">{{ live_metrics.focus_display }}</span><span class="text-[#262626]">•</span><span>{{ session.project.title|default:"No active project" }}</span>{% else %}<span>No active project</span>{% endif %}</div>
   </div>
 </div>
-{% include "execution/mission_launch.html" with oob=True %}
 {% endif %}
-<div class="py-8 sm:py-12">
+<div id="mission-panel" class="py-8 sm:py-12">
   <div class="flex items-center justify-between gap-4">
     <div>
       <p class="mc-muted text-[0.65rem] uppercase tracking-[0.34em]">Current operation</p>
@@ -32,13 +31,13 @@
   {% if session %}
     <div class="flex flex-wrap justify-center gap-3 border-t mc-rule pt-8">
       {% if session.status == 'running' %}
-        <form method="post" hx-post="{% url 'execution:action' %}" hx-target="#mission-live" hx-swap="innerHTML" hx-sync="#mission-live:drop" hx-disabled-elt="button"><input type="hidden" name="action" value="pause">{% csrf_token %}<button type="submit" class="mc-action px-7 text-sm font-semibold uppercase tracking-[0.16em]">Pause <span class="htmx-indicator">...</span></button></form>
+        <form method="post" hx-post="{% url 'execution:action' %}" hx-target="#mission-live-panel" hx-swap="innerHTML" hx-sync="#mission-live-panel:drop" hx-disabled-elt="button"><input type="hidden" name="action" value="pause">{% csrf_token %}<button type="submit" class="mc-action px-7 text-sm font-semibold uppercase tracking-[0.16em]">Pause <span class="htmx-indicator">...</span></button></form>
       {% elif session.status == 'paused' %}
-        <form method="post" hx-post="{% url 'execution:action' %}" hx-target="#mission-live" hx-swap="innerHTML" hx-sync="#mission-live:drop" hx-disabled-elt="button"><input type="hidden" name="action" value="resume">{% csrf_token %}<button type="submit" class="mc-action mc-primary px-7 text-sm font-semibold uppercase tracking-[0.16em]">Resume <span class="htmx-indicator">...</span></button></form>
+        <form method="post" hx-post="{% url 'execution:action' %}" hx-target="#mission-live-panel" hx-swap="innerHTML" hx-sync="#mission-live-panel:drop" hx-disabled-elt="button"><input type="hidden" name="action" value="resume">{% csrf_token %}<button type="submit" class="mc-action mc-primary px-7 text-sm font-semibold uppercase tracking-[0.16em]">Resume <span class="htmx-indicator">...</span></button></form>
       {% endif %}
       {% if session.status == 'running' or session.status == 'paused' %}
-        <form method="post" hx-post="{% url 'execution:action' %}" hx-target="#mission-live" hx-swap="innerHTML" hx-sync="#mission-live:drop" hx-disabled-elt="button"><input type="hidden" name="action" value="finish">{% csrf_token %}<button type="submit" class="mc-action mc-primary px-7 text-sm font-semibold uppercase tracking-[0.16em]" hx-confirm="Finish this mission?">Finish <span class="htmx-indicator">...</span></button></form>
-        <form method="post" hx-post="{% url 'execution:action' %}" hx-target="#mission-live" hx-swap="innerHTML" hx-sync="#mission-live:drop" hx-disabled-elt="button"><input type="hidden" name="action" value="abort">{% csrf_token %}<button type="submit" class="mc-action mc-danger px-7 text-sm font-semibold uppercase tracking-[0.16em]" hx-confirm="Abort this mission?">Abort <span class="htmx-indicator">...</span></button></form>
+        <form method="post" hx-post="{% url 'execution:action' %}" hx-target="#mission-live-panel" hx-swap="innerHTML" hx-sync="#mission-live-panel:drop" hx-disabled-elt="button"><input type="hidden" name="action" value="finish">{% csrf_token %}<button type="submit" class="mc-action mc-primary px-7 text-sm font-semibold uppercase tracking-[0.16em]" hx-confirm="Finish this mission?">Finish <span class="htmx-indicator">...</span></button></form>
+        <form method="post" hx-post="{% url 'execution:action' %}" hx-target="#mission-live-panel" hx-swap="innerHTML" hx-sync="#mission-live-panel:drop" hx-disabled-elt="button"><input type="hidden" name="action" value="abort">{% csrf_token %}<button type="submit" class="mc-action mc-danger px-7 text-sm font-semibold uppercase tracking-[0.16em]" hx-confirm="Abort this mission?">Abort <span class="htmx-indicator">...</span></button></form>
       {% endif %}
     </div>
   {% endif %}

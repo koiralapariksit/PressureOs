@@ -5,7 +5,7 @@
       <span class="mc-muted">Project selection is locked while active</span>
     </div>
   {% else %}
-    <form method="post" hx-post="{% url 'execution:start' %}" hx-target="#mission-live" hx-swap="innerHTML" hx-sync="#mission-live:drop" hx-disabled-elt="button" class="mx-auto max-w-2xl">
+    <form method="post" hx-post="{% url 'execution:start' %}" hx-target="#mission-live-panel" hx-swap="innerHTML" hx-sync="#mission-live-panel:drop" hx-disabled-elt="button" class="mx-auto max-w-2xl">
       {% csrf_token %}<input type="hidden" name="action" value="start">
       <div class="grid gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
         <label class="block text-left"><span class="mc-muted text-xs uppercase tracking-[0.24em]">Project</span>{{ form.project }}</label>

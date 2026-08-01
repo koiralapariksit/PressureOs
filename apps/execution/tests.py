@@ -106,3 +106,12 @@ class ExecutionTrackingTests(TestCase):
 
         self.assertEqual(session.status, FocusSession.Status.ABORTED)
         self.assertEqual(ExecutionService.abort_session(session).status, FocusSession.Status.ABORTED)
+
+    def test_htmx_panel_fragment_exposes_panel_anchor(self):
+        self.client.login(username="executionuser", password="secret123")
+
+        response = self.client.get(reverse("execution:panel"), HTTP_HX_REQUEST="true")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "execution/mission_panel.html")
+        self.assertContains(response, 'id="mission-panel"')
