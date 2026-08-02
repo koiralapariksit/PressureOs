@@ -43,6 +43,13 @@ class DailyCheckInTests(TestCase):
 
     def test_duplicate_check_in_updates_existing_daily_log(self):
         self.assertTrue(self.client.login(username="trackeruser", password="secret123"))
+        FocusSession.objects.create(
+            owner=self.user,
+            project=self.project,
+            operation_name="Shipping review",
+            status=FocusSession.Status.COMPLETED,
+            total_seconds=7200,
+        )
 
         first_response = self.client.post(
             reverse("tracker:checkin"),
@@ -77,7 +84,7 @@ class DailyCheckInTests(TestCase):
         daily_logs = DailyLog.objects.filter(owner=self.user, project=self.project, log_date=timezone.localdate())
         self.assertEqual(daily_logs.count(), 1)
         daily_log = daily_logs.get()
-        self.assertEqual(daily_log.hours_worked, Decimal("4.0"))
+        self.assertEqual(daily_log.hours_worked, Decimal("2.00"))
         self.assertEqual(daily_log.tasks_finished, 1)
         self.assertEqual(daily_log.notes, "Updated submission.")
         self.assertTrue(daily_log.completed)
@@ -100,3 +107,31 @@ class DailyCheckInTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'value="1.00"')
+
+    def test_check_in_uses_execution_hours_as_source_of_truth(self):
+        self.assertTrue(self.client.login(username="trackeruser", password="secret123"))
+        FocusSession.objects.create(
+            owner=self.user,
+            project=self.project,
+            operation_name="Shipping review",
+            status=FocusSession.Status.COMPLETED,
+            total_seconds=7200,
+        )
+
+        response = self.client.post(
+            reverse("tracker:checkin"),
+            {
+                "project": self.project.pk,
+                "hours_worked": 4.0,
+                "tasks_finished": 3,
+                "notes": "Mission control should win.",
+                "energy_level": DailyLog.EnergyLevel.HIGH,
+                "github_commits": 2,
+                "distractions": 1,
+                "completed": True,
+            },
+        )
+
+        self.assertRedirects(response, reverse("tracker:checkin_success"))
+        daily_log = DailyLog.objects.get(owner=self.user, project=self.project, log_date=timezone.localdate())
+        self.assertEqual(daily_log.hours_worked, Decimal("2.00"))

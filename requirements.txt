@@ -1,2 +1,4 @@
-django>=5.0
+﻿Django>=5.0
 reportlab
+psycopg[binary]
+django-environ

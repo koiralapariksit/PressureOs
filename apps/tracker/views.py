@@ -49,6 +49,7 @@ class DailyCheckInForm(ModelForm):
         self.fields["hours_worked"].initial = Decimal("0.00")
         self.fields["hours_worked"].widget.attrs["min"] = "0"
         self.fields["hours_worked"].widget.attrs["step"] = "0.01"
+        self.fields["hours_worked"].widget.attrs["readonly"] = "readonly"
 
 
 class DailyCheckInView(LoginRequiredMixin, FormView):
@@ -68,9 +69,7 @@ class DailyCheckInView(LoginRequiredMixin, FormView):
             "project": project,
             "log_date": timezone.localdate(),
         }
-        hours_worked = form.cleaned_data.get("hours_worked")
-        if hours_worked in {None, ""}:
-            hours_worked = ExecutionService.get_project_hours_for_today(self.request.user, project)
+        hours_worked = ExecutionService.get_project_hours_for_today(self.request.user, project)
         defaults = {
             "hours_worked": hours_worked or Decimal("0.00"),
             "tasks_finished": form.cleaned_data["tasks_finished"],

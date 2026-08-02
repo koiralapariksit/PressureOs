@@ -13,24 +13,32 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 import os
 from pathlib import Path
 
+import environ
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+env = environ.Env(
+    DJANGO_DEBUG=(bool, True),
+    DJANGO_ALLOWED_HOSTS=(list, ['127.0.0.1', 'localhost', '0.0.0.0', 'testserver']),
+    DJANGO_CSRF_TRUSTED_ORIGINS=(list, ['http://127.0.0.1', 'http://127.0.0.1:8000', 'http://localhost', 'http://localhost:8000']),
+)
+environ.Env.read_env(BASE_DIR / '.env')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get(
+SECRET_KEY = env(
     'DJANGO_SECRET_KEY',
-    'django-insecure-t%qrz*$@y-67ap6b^0*xek^n2(e2_n*05=o4&888xm)(&gs53w',
+    default='django-insecure-t%qrz*$@y-67ap6b^0*xek^n2(e2_n*05=o4&888xm)(&gs53w',
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DJANGO_DEBUG', 'True').strip().lower() in ('1', 'true', 'yes')
+DEBUG = env.bool('DJANGO_DEBUG', default=True)
 
-ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost,0.0.0.0,testserver').split(',')
-CSRF_TRUSTED_ORIGINS = os.environ.get('DJANGO_CSRF_TRUSTED_ORIGINS', 'http://127.0.0.1,http://127.0.0.1:8000,http://localhost,http://localhost:8000').split(',')
+ALLOWED_HOSTS = env.list('DJANGO_ALLOWED_HOSTS', default=['127.0.0.1', 'localhost', '0.0.0.0', 'testserver'])
+CSRF_TRUSTED_ORIGINS = env.list('DJANGO_CSRF_TRUSTED_ORIGINS', default=['http://127.0.0.1', 'http://127.0.0.1:8000', 'http://localhost', 'http://localhost:8000'])
 
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
@@ -102,12 +110,18 @@ WSGI_APPLICATION = 'pressure_os.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+DATABASE_URL = env.str('DATABASE_URL', default='')
+if DATABASE_URL:
+    DATABASES = {
+        'default': env.db('DATABASE_URL')
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
