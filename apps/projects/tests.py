@@ -5,6 +5,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
+from apps.projects.forms import ProjectForm
 from apps.projects.models import FailureRecord, Project
 
 
@@ -36,6 +37,25 @@ class ProjectWorkflowTests(TestCase):
         self.assertEqual(project.time_remaining_percentage, 87.5)
         self.assertFalse(project.deadline_passed)
         self.assertEqual(project.project_status, "Moderate")
+
+    def test_project_form_exposes_start_date_and_rejects_invalid_date_order(self):
+        form = ProjectForm()
+        self.assertIn("start_date", form.fields)
+
+        data = {
+            "title": "Historic mission",
+            "description": "This should fail.",
+            "start_date": (timezone.localdate() - timedelta(days=2)).isoformat(),
+            "deadline": (timezone.localdate() - timedelta(days=1)).isoformat(),
+            "target_hours": 24,
+            "expected_daily_hours": 4,
+            "priority": "high",
+            "github_repository": "https://github.com/example/onboarding",
+            "progress_percent": 10,
+        }
+        form = ProjectForm(data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("deadline", form.errors)
 
     def test_past_deadline_is_rejected_on_backend(self):
         response = self.client.post(

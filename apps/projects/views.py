@@ -30,7 +30,7 @@ class ProjectCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
-        form.instance.start_date = timezone.localdate()
+        form.instance.start_date = form.cleaned_data.get("start_date") or timezone.localdate()
         return super().form_valid(form)
 
 
